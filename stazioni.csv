@@ -1,0 +1,377 @@
+codice;nome;comune;prov;area;quota_m;lat;lon;pos_approssimata
+TOS11000039;Anghiari;Anghiari;AR;Alta Tiberina;312;43.55929;12.0974;no
+TOS30233300;Badia Tedalda;Badia Tedalda;AR;Alta Tiberina;843;43.68583;12.13367;no
+TOS06006078;Montedoglio;Anghiari;AR;Alta Tiberina;412;43.59139;12.05333;no
+TOS19000701;Monterchi;Monterchi;AR;Alta Tiberina;309;43.4895;12.105;no
+TOS11000040;Pieve S. Stefano;Pieve Santo Stefano;AR;Alta Tiberina;750;43.67395;12.10195;no
+TOS19000702;Pieve S. Stefano;Pieve Santo Stefano;AR;Alta Tiberina;434;43.66903;12.0428;no
+TOS11000026;Sestino;Sestino;AR;Alta Tiberina;1000;43.74964;12.27469;no
+TOS11000114;Abbadia S. S. - Laghetto Verde;Abbadia San Salvatore;SI;Amiata-Val d Orcia;910;42.8831;11.66162;no
+TOS11000115;Abbadia S. S. - Vetta Amiata;Abbadia San Salvatore;SI;Amiata-Val d Orcia;1678;42.8901;11.6252;no
+TOS07000001;Abbadia S. Salvatore;Abbadia San Salvatore;SI;Amiata-Val d Orcia;855;42.89434;11.66937;no
+TOS11000054;Baccinello;Grosseto;GR;Amiata-Val d Orcia;370;42.79551;11.40599;no
+TOS11000067;Buonconvento;Montalcino;SI;Amiata-Val d Orcia;188;43.0918;11.43881;no
+TOS03003041;Capanne;Manciano;GR;Amiata-Val d Orcia;438;42.69088;11.54675;no
+TOS03002901;Castel del Piano;Castel del Piano;GR;Amiata-Val d Orcia;566;42.89396;11.52671;no
+TOS11000058;Castiglione d�Orcia;Castiglione d' Orcia;SI;Amiata-Val d Orcia;672;42.96079;11.61771;no
+TOS03002941;Granaione;Campagnatico;GR;Amiata-Val d Orcia;148;42.80437;11.30323;no
+TOS03003079;Manciano;Manciano;GR;Amiata-Val d Orcia;447;42.60036;11.5185;no
+TOS03005895;Marsiliana;Manciano;GR;Amiata-Val d Orcia;16;42.5441;11.33643;no
+TOS03002701;Montalcino;Montalcino;SI;Amiata-Val d Orcia;594;43.05017;11.49061;no
+TOS03002801;Monte Antico;Civitella Paganico;GR;Amiata-Val d Orcia;82;42.98382;11.3647;no
+TOS11000051;Montenero;Castel del Piano;GR;Amiata-Val d Orcia;193;42.95061;11.43946;no
+TOS03002869;Monticchiello;Pienza;SI;Amiata-Val d Orcia;495;43.06633;11.72484;no
+TOS03002921;Paganico;Civitella Paganico;GR;Amiata-Val d Orcia;70;42.93971;11.28446;no
+TOS03002789;Pari;Civitella Paganico;GR;Amiata-Val d Orcia;330;43.06232;11.32247;no
+TOS11000060;Piancastagnaio;Piancastagnaio;SI;Amiata-Val d Orcia;341;42.81814;11.73254;no
+TOS07000046;Pitigliano;Pitigliano;GR;Amiata-Val d Orcia;157;42.59349;11.59965;no
+TOS11000014;Pitigliano;Pitigliano;GR;Amiata-Val d Orcia;300;42.6351;11.6543;no
+TOS11000061;Radicofani;Radicofani;SI;Amiata-Val d Orcia;618;42.94829;11.73313;no
+TOS11000059;Ripa d�Orcia;Castiglione d'Orcia;SI;Amiata-Val d Orcia;506;43.02728;11.58249;no
+TOS03003019;Roccalbegna;Roccalbegna;GR;Amiata-Val d Orcia;522;42.78639;11.50572;no
+TOS11000052;S. Fiora;Arcidosso;GR;Amiata-Val d Orcia;813;42.85448;11.55579;no
+TOS03003071;Scansano;Scansano;GR;Amiata-Val d Orcia;576;42.69383;11.32938;no
+TOS11000055;Semproniano;Semproniano;GR;Amiata-Val d Orcia;485;42.73098;11.59651;no
+TOS07000072;Sorano Meteo;Sorano;GR;Amiata-Val d Orcia;782;42.72806;11.68444;no
+TOS03002819;Spineta;Sarteano;SI;Amiata-Val d Orcia;633;42.95121;11.853;no
+TOS03003063;Torricelle;Scansano;GR;Amiata-Val d Orcia;170;42.64212;11.42514;no
+TOS03003053;Usi;Roccalbegna;GR;Amiata-Val d Orcia;411;42.7183;11.49098;no
+TOS11000094;Acquerino;Sambuca Pistoiese;PT;App. Pistoiese;950;44.02327;11.02527;no
+TOS11000077;Albano;Monsummano Terme;PT;App. Pistoiese;465;43.87653;10.85953;no
+TOS01001263;Baggio;Pistoia;PT;App. Pistoiese;525;43.99124;10.96416;no
+TOS02000351;Boscolungo;Abetone Cutigliano;PT;App. Pistoiese;1345;44.13909;10.67354;no
+TOS02004215;Casotti di Cutigliano;Abetone Cutigliano;PT;App. Pistoiese;593;44.0982;10.7517;no
+TOS01001629;Castelmartini;Larciano;PT;App. Pistoiese;20;43.82056;10.82544;no
+TOS02000372;Croce Arcana;Abetone Cutigliano;PT;App. Pistoiese;1716;44.12988;10.78154;no
+TOS01001269;La Ferruccia;Agliana;PT;App. Pistoiese;40;43.88455;11.00385;no
+TOS02000359;Melo;Abetone Cutigliano;PT;App. Pistoiese;1000;44.13272;10.74317;no
+TOS01001253;Montagnana;Marliana;PT;App. Pistoiese;385;43.95367;10.82304;no
+TOS02000421;Monte Oppio;San Marcello Piteglio;PT;App. Pistoiese;810;44.04182;10.83273;no
+TOS01001601;Montecatini Terme;Montecatini Terme;PT;App. Pistoiese;95;43.89332;10.77203;no
+TOS03001580;Pescia;Pescia;PT;App. Pistoiese;78;43.89653;10.69502;no
+TOS01004839;Pontelungo valle;Pistoia;PT;App. Pistoiese;66;43.91981;10.89593;no
+TOS30150800;Pracchia;Pistoia;PT;App. Pistoiese;620;44.05549;10.90671;no
+TOS02000441;Prunetta;San Marcello Piteglio;PT;App. Pistoiese;960;44.00848;10.80401;no
+TOS01001634;S. Baronto;Quarrata;PT;App. Pistoiese;442;43.84511;10.90624;no
+TOS02000431;S. Marcello Pistoiese;San Marcello Piteglio;PT;App. Pistoiese;618;44.05538;10.78856;no
+TOS03001241;Sammommè;Pistoia;PT;App. Pistoiese;785;44.03692;10.92043;no
+TOS11000093;Santomato;Pistoia;PT;App. Pistoiese;125;43.94706;10.98773;no
+TOS02000401;Selva dei Porci;San Marcello Piteglio;PT;App. Pistoiese;755;44.07209;10.7942;no
+TOS01001561;Serra Pistoiese;Marliana;PT;App. Pistoiese;790;43.97231;10.75596;no
+TOS11000091;Sorana;Pescia;PT;App. Pistoiese;560;43.96909;10.71639;no
+TOS30290700;Treppio;Sambuca Pistoiese;PT;App. Pistoiese;727;44.075;11.03483;no
+TOS11000076;Artimino;Carmignano;PO;App. Pratese;107;43.76771;11.04835;no
+TOS01001151;Cantagallo;Cantagallo;PO;App. Pratese;555;44.02161;11.07948;no
+TOS30290100;Cottede;Vernio;PO;App. Pratese;770;44.10533;11.1715;no
+TOS01001273;Fattoria Iavello;Montemurlo;PO;App. Pratese;518;43.95908;11.07002;no
+TOS01004779;Gamberame;Vaiano;PO;App. Pratese;107;43.92291;11.12702;no
+TOS01001161;Gavigno;Cantagallo;PO;App. Pratese;752;44.06965;11.09253;no
+TOS01001205;Prato Università;Prato;PO;App. Pratese;65;43.88556;11.09921;no
+TOS11000503;Vaiano acquedotto;Vaiano;PO;App. Pratese;322;43.96483;11.1472;no
+TOS01001171;Vernio;Vernio;PO;App. Pratese;695;44.05668;11.12056;no
+TOS01004007;Avenza;Carrara;MS;Apuane-Versilia;15;44.04516;10.06013;no
+TOS02004059;Camaiore;Camaiore;LU;Apuane-Versilia;21;43.93373;10.28103;no
+TOS11000029;Campocecina;Carrara;MS;Apuane-Versilia;960;44.11642;10.10391;no
+TOS11000027;Candia Scurtarola;Massa;MS;Apuane-Versilia;150;44.04778;10.10957;no
+TOS02004011;Canevara;Massa;MS;Apuane-Versilia;105;44.05829;10.16812;no
+TOS02000088;Cerreto;Montignoso;MS;Apuane-Versilia;477;44.03014;10.17188;no
+TOS02000494;Gombitelli;Camaiore;LU;Apuane-Versilia;475;43.92008;10.37013;no
+TOS11000011;Lido di Camaiore;Camaiore;LU;Apuane-Versilia;1;43.89768;10.24294;no
+TOS01000056;Pian della Fioba;Massa;MS;Apuane-Versilia;860;44.05702;10.20694;no
+TOS03000091;Pietrasanta;Pietrasanta;LU;Apuane-Versilia;1;43.93665;10.22805;no
+TOS11000102;Strettoia;Pietrasanta;LU;Apuane-Versilia;124;43.99305;10.20934;no
+TOS03004003;Torano;Carrara;MS;Apuane-Versilia;142;44.09104;10.10333;no
+TOS02000108;Vallelunga;Camaiore;LU;Apuane-Versilia;671;43.96902;10.33614;no
+TOS01000025;Vara;Carrara;MS;Apuane-Versilia;409;44.08376;10.12965;no
+TOS02000047;Vergheto;Massa;MS;Apuane-Versilia;845;44.09449;10.17068;no
+TOS03000775;Alpe di Poti;Arezzo;AR;Aretino;971;43.47133;11.97479;no
+TOS01000772;Arezzo - Fattoria S. Fabiano;Arezzo;AR;Aretino;305;43.47714;11.90378;no
+TOS01000701;Capezzine;Cortona;AR;Aretino;326;43.18287;11.93212;no
+TOS01000761;Castiglion Fiorentino;Castiglion Fiorentino;AR;Aretino;270;43.34283;11.92896;no
+TOS11000037;Cesa;Marciano della Chiana;AR;Aretino;246;43.30845;11.82488;no
+TOS01000751;Cortona;Cortona;AR;Aretino;427;43.26916;11.9963;no
+TOS03000755;Croce di Lignano;Arezzo;AR;Aretino;817;43.40569;11.88292;no
+TOS03000757;Monte Ginezzo;Cortona;AR;Aretino;921;43.27481;12.08775;no
+TOS01000741;Monte S. Savino;Monte San Savino;AR;Aretino;275;43.33913;11.74235;no
+TOS11000038;Ottavo;Arezzo;AR;Aretino;313;43.37349;11.89039;no
+TOS19000703;Palazzo del Pero;Arezzo;AR;Aretino;410;43.42083;11.97917;no
+TOS01000621;Badia Prataglia;Poppi;AR;Casentino;845;43.7942;11.87682;no
+TOS01000626;Bibbiena;Bibbiena;AR;Casentino;415;43.71184;11.83012;no
+TOS01000611;Camaldoli;Poppi;AR;Casentino;1111;43.81042;11.81738;no
+TOS01000639;La Verna;Chiusi della Verna;AR;Casentino;1125;43.70691;11.93133;no
+TOS03000653;Montecchio;Subbiano;AR;Casentino;585;43.58028;11.90343;no
+TOS01000591;Montemignaio;Montemignaio;AR;Casentino;745;43.74024;11.62068;no
+TOS01000601;Ortignano;Ortignano Raggiolo;AR;Casentino;346;43.68192;11.75154;no
+TOS01000651;Salutio;Castel Focognano;AR;Casentino;315;43.61514;11.81319;no
+TOS01000581;Stia;Pratovecchio Stia;AR;Casentino;537;43.80178;11.71761;no
+TOS11000105;Stia Monte;Pratovecchio Stia;AR;Casentino;838;43.83164;11.70131;no
+TOS01000571;Vallucciole;Pratovecchio Stia;AR;Casentino;745;43.84202;11.65748;no
+TOS11000502;Zoo di Poppi;Poppi;AR;Casentino;417;43.736;11.7825;no
+TOS11000022;Barberino;Barberino Tavarnelle;FI;Fiorentino;430;43.51176;11.23584;no
+TOS01001103;Caldine;Fiesole;FI;Fiorentino;225;43.83976;11.31135;no
+TOS01004784;Calenzano;Calenzano;FI;Fiorentino;60;43.86086;11.155;no
+TOS11000505;Casa Sartori;Montespertoli;FI;Fiorentino;198;43.66727;11.04185;no
+TOS01001225;Case Passerini;Sesto Fiorentino;FI;Fiorentino;33;43.81975;11.16823;no
+TOS01004971;Castelfiorentino;Castelfiorentino;FI;Fiorentino;50;43.60448;10.9684;no
+TOS01001102;Cercina;Sesto Fiorentino;FI;Fiorentino;305;43.84426;11.2615;no
+TOS11000071;Cerreto Guidi;Cerreto Guidi;FI;Fiorentino;70;43.74198;10.89366;no
+TOS01004967;Certaldo;Certaldo;FI;Fiorentino;65;43.54469;11.03477;no
+TOS01004941;Empoli;Empoli;FI;Fiorentino;25;43.72403;10.94622;no
+TOS01001129;Ferrone;Greve in Chianti;FI;Fiorentino;150;43.6484;11.26415;no
+TOS03001099;Firenze Giardino di Boboli;Firenze;FI;Fiorentino;112;43.76194;11.25139;no
+TOS03001097;Firenze Orto Botanico;Firenze;FI;Fiorentino;48;43.7795;11.26081;no
+TOS01001096;Firenze Università;Firenze;FI;Fiorentino;84;43.79879;11.25114;no
+TOS11000073;Greve in Chianti;Greve in Chianti;FI;Fiorentino;254;43.61183;11.30421;no
+TOS11000023;Lamole;Greve in Chianti;FI;Fiorentino;536;43.54209;11.35548;no
+TOS01001189;Le Croci di Calenzano;Calenzano;FI;Fiorentino;421;43.94476;11.21374;no
+TOS11000504;Monteboro;Empoli;FI;Fiorentino;90;43.6926;10.923;no
+TOS01004915;Montespertoli;Montespertoli;FI;Fiorentino;117;43.65;11.09236;no
+TOS01004659;Nave di Rosano;Rignano sull'Arno;FI;Fiorentino;79;43.7712;11.42282;no
+TOS01001445;Poggio Aglione;Gambassi Terme;FI;Fiorentino;441;43.52988;10.92797;no
+TOS03001135;Poggio alla Croce;Figline e Incisa Valdarno;FI;Fiorentino;500;43.65009;11.39247;no
+TOS01004811;Ponte a Signa;Signa;FI;Fiorentino;32;43.77305;11.09295;no
+TOS11000024;Remole;Pontassieve;FI;Fiorentino;230;43.7965;11.41281;no
+TOS01001059;S. Brigida all�Opaco;Pontassieve;FI;Fiorentino;407;43.84901;11.40218;no
+TOS03001137;S. Donato in Collina;Bagno a Ripoli;FI;Fiorentino;382;43.72062;11.38075;no
+TOS01001215;S. Giusto;Scandicci;FI;Fiorentino;42;43.75995;11.19376;no
+TOS11000057;Sambuca;San Casciano in Val di Pesa;FI;Fiorentino;325;43.59495;11.23424;no
+TOS01004725;Strada in Chianti;Greve in Chianti;FI;Fiorentino;144;43.66432;11.31454;no
+TOS11000021;Tavarnelle;Barberino Tavarnelle;FI;Fiorentino;374;43.57191;11.16251;no
+TOS01004921;Turbone;Montelupo Fiorentino;FI;Fiorentino;45;43.71861;11.03591;no
+TOS01001371;Vinci;Vinci;FI;Fiorentino;250;43.78579;10.95952;no
+TOS03001145;Vingone;Scandicci;FI;Fiorentino;54;43.74309;11.18226;no
+TOS02000083;Azzano;Seravezza;LU;Garfagnana-Apuane int.;430;44.02352;10.22863;no
+TOS11000092;Bagni di Lucca;Bagni di Lucca;LU;Garfagnana-Apuane int.;565;44.03424;10.60018;no
+TOS11000048;Barga;Barga;LU;Garfagnana-Apuane int.;270;44.06996;10.4588;no
+TOS02000241;Campagrina;Stazzema;LU;Garfagnana-Apuane int.;807;44.05872;10.25949;no
+TOS02004115;Camporgiano;Camporgiano;LU;Garfagnana-Apuane int.;390;44.16294;10.33842;no
+TOS02000161;Capanne di Sillano;Sillano Giuncugnano;LU;Garfagnana-Apuane int.;1035;44.25599;10.30967;no
+TOS02000077;Cardoso;Stazzema;LU;Garfagnana-Apuane int.;390;44.00979;10.31898;no
+TOS11000096;Careggine;Careggine;LU;Garfagnana-Apuane int.;1100;44.10439;10.33695;no
+TOS02000221;Casone di Profecchia;Castiglione di Garfagnana;LU;Garfagnana-Apuane int.;1297;44.21044;10.44725;no
+TOS02000081;Cervaiole;Seravezza;LU;Garfagnana-Apuane int.;1140;44.03926;10.24561;no
+TOS02004255;Chifenti;Borgo a Mozzano;LU;Garfagnana-Apuane int.;103;44.002;10.55751;no
+TOS02000332;Fabbriche di Vallico;Fabbriche di Vergemoli;LU;Garfagnana-Apuane int.;345;43.9996;10.43214;no
+TOS03000335;Foce a Giovo;Coreglia Antelminelli;LU;Garfagnana-Apuane int.;1674;44.11826;10.60926;no
+TOS02000281;Fornovolasco;Fabbriche di Vergemoli;LU;Garfagnana-Apuane int.;493;44.02896;10.36055;no
+TOS02000078;Gallena;Stazzema;LU;Garfagnana-Apuane int.;345;43.99206;10.25179;no
+TOS02000299;Gallicano;Gallicano;LU;Garfagnana-Apuane int.;179;44.06412;10.44298;no
+TOS09001210;Minucciano;Minucciano;LU;Garfagnana-Apuane int.;666;44.17037;10.20877;si
+TOS02000171;Monte Castellino;Sillano Giuncugnano;LU;Garfagnana-Apuane int.;858;44.23509;10.3327;no
+TOS02000275;Monte Romecchio;Barga;LU;Garfagnana-Apuane int.;1591;44.16352;10.52079;no
+TOS11000097;Orecchiella;San Romano in Garfagnana;LU;Garfagnana-Apuane int.;1169;44.20036;10.35987;no
+TOS02000177;Orto di Donna;Minucciano;LU;Garfagnana-Apuane int.;1070;44.13464;10.19736;no
+TOS02000329;Palagnana;Stazzema;LU;Garfagnana-Apuane int.;861;43.99643;10.36314;no
+TOS02000155;Passo Pradarena;Sillano Giuncugnano;LU;Garfagnana-Apuane int.;1580;44.28452;10.30105;no
+TOS11000106;Passo Radici;Castiglione di Garfagnana;LU;Garfagnana-Apuane int.;1637;44.19708;10.4867;no
+TOS30355400;Passo Radici;Castiglione di Garfagnana;LU;Garfagnana-Apuane int.;1530;44.21011;10.48871;no
+TOS11000034;Piazza al Serchio;Piazza al Serchio;LU;Garfagnana-Apuane int.;660;44.19231;10.29164;no
+TOS02000075;Pomezzana;Stazzema;LU;Garfagnana-Apuane int.;600;43.9853;10.31477;no
+TOS02004045;Ponte Tavole;Seravezza;LU;Garfagnana-Apuane int.;11;43.97257;10.18492;no
+TOS02004165;Ponte di Campia;Barga;LU;Garfagnana-Apuane int.;197;44.09005;10.45282;no
+TOS02004231;Ponte di Lucchio;Bagni di Lucca;LU;Garfagnana-Apuane int.;350;44.04359;10.7198;no
+TOS03000278;Renaio;Barga;LU;Garfagnana-Apuane int.;1013;44.10879;10.52682;no
+TOS02000079;Retignano;Stazzema;LU;Garfagnana-Apuane int.;420;44.00503;10.2715;no
+TOS02000339;Tereglio;Coreglia Antelminelli;LU;Garfagnana-Apuane int.;590;44.05985;10.56779;no
+TOS02000064;Terrinca;Stazzema;LU;Garfagnana-Apuane int.;840;44.02854;10.27563;no
+TOS02000191;Vagli di Sotto;Vagli Sotto;LU;Garfagnana-Apuane int.;581;44.10855;10.28943;no
+TOS02000203;Villacollemandina;Villa Collemandina;LU;Garfagnana-Apuane int.;502;44.15934;10.38613;no
+TOS11000049;Aquilea;Lucca;LU;Lucchesia;134;43.91368;10.50197;no
+TOS02004271;Borgo a Mozzano;Borgo a Mozzano;LU;Lucchesia;100;43.97988;10.55151;no
+TOS02004195;Calavorno;Coreglia Antelminelli;LU;Lucchesia;137;44.01975;10.5351;no
+TOS03000513;Capannori;Capannori;LU;Lucchesia;14;43.83029;10.55726;no
+TOS02000515;Chiatri;Lucca;LU;Lucchesia;285;43.87355;10.37883;no
+TOS02000483;Convalle;Pescaglia;LU;Lucchesia;285;43.95243;10.42259;no
+TOS02000512;Lucca (Orto Botanico);Lucca;LU;Lucchesia;16;43.84186;10.51086;no
+TOS11000512;Monte Pisano Nord;Capannori;LU;Lucchesia;216;43.79401;10.52239;no
+TOS11000031;Montecarlo;Montecarlo;LU;Lucchesia;73;43.84286;10.65396;no
+TOS02004286;Mutigliano;Lucca;LU;Lucchesia;34;43.88176;10.48419;no
+TOS02004284;Piaggione;Lucca;LU;Lucchesia;72;43.92935;10.51428;no
+TOS11000033;Pieve di Compito;Capannori;LU;Lucchesia;38;43.78002;10.58941;no
+TOS03001841;Pizzorne;Villa Basilica;LU;Lucchesia;938;43.93443;10.58463;no
+TOS02004305;Ponte Guido;Lucca;LU;Lucchesia;23;43.86504;10.43317;no
+TOS02004315;Pontetetto;Lucca;LU;Lucchesia;13;43.82965;10.46976;no
+TOS11000032;S. Pietro a Marcigliano;Capannori;LU;Lucchesia;238;43.90595;10.59299;no
+TOS02004081;Torre del Lago;Viareggio;LU;Lucchesia;1;43.83182;10.30683;no
+TOS02004091;Viareggio 1;Viareggio;LU;Lucchesia;0;43.86767;10.25948;no
+TOS03000481;Viareggio Lungomare;Viareggio;LU;Lucchesia;25;43.87184;10.24034;no
+TOS09000015;Bagnone;Bagnone;MS;Lunigiana;195;44.31536;9.99579;si
+TOS09000023;Bosco di Rossano;Zeri;MS;Lunigiana;670;44.32545;9.7925;si
+TOS09001143;Comano;Comano;MS;Lunigiana;734;44.29166;10.13041;si
+TOS09001220;Equi Terme;Fivizzano;MS;Lunigiana;250;44.16931;10.15282;si
+TOS09001130;Iera;Bagnone;MS;Lunigiana;538;44.33261;10.03299;si
+TOS30209600;Lago Paduli;Comano;MS;Lunigiana;1168;44.33833;10.1375;no
+TOS09000021;Licciana Nardi;Licciana Nardi;MS;Lunigiana;121;44.26537;10.03911;si
+TOS09001200;Mazzola;Fivizzano;MS;Lunigiana;460;44.21035;10.11577;si
+TOS11000099;Novegigola;Tresana;MS;Lunigiana;420;44.22178;9.89976;no
+TOS09001110;Parana;Mulazzo;MS;Lunigiana;695;44.28221;9.86098;si
+TOS09000024;Passo del Brattello;Pontremoli;MS;Lunigiana;955;44.45815;9.82447;si
+TOS09001160;Passo del Cerreto;Fivizzano;MS;Lunigiana;1250;44.30388;10.21725;si
+TOS09001053;Passo della Cisa;Pontremoli;MS;Lunigiana;1014;44.47146;9.92868;si
+TOS09001061;Patigno;Zeri;MS;Lunigiana;744;44.35289;9.76338;si
+TOS09000022;Pietra Piccata;Pontremoli;MS;Lunigiana;955;44.33855;9.83813;si
+TOS11000101;Pontremoli;Pontremoli;MS;Lunigiana;340;44.36949;9.89275;no
+TOS09001080;Pontremoli depuratore;Pontremoli;MS;Lunigiana;226;44.3761;9.88166;si
+TOS09001088;Rocca Sigillina;Filattiera;MS;Lunigiana;484;44.3652;9.95541;si
+TOS03000109;Soliera;Fivizzano;MS;Lunigiana;120;44.20232;10.0625;no
+TOS09001230;Tendola;Fosdinovo;MS;Lunigiana;410;44.1617;10.03859;si
+TOS09001180;Turano;Fivizzano;MS;Lunigiana;500;44.24649;10.15124;si
+TOS09001120;Villafranca;Villafranca in Lunigiana;MS;Lunigiana;121;44.29532;9.95069;si
+TOS11000100;Villafranca;Villafranca in Lunigiana;MS;Lunigiana;156;44.25032;9.9689;no
+TOS11000103;Alberese;Grosseto;GR;Maremma-Costa;1;42.66074;11.0167;no
+TOS11000079;Argentario;Monte Argentario;GR;Maremma-Costa;615;42.38677;11.16957;no
+TOS03002571;Batignano;Grosseto;GR;Maremma-Costa;140;42.86804;11.16564;no
+TOS11000009;Bibbona;Bibbona;LI;Maremma-Costa;70;43.26222;10.59669;no
+TOS11000008;Braccagni;Grosseto;GR;Maremma-Costa;40;42.93121;11.08042;no
+TOS03002551;Caldana;Gavorrano;GR;Maremma-Costa;146;42.89331;10.92738;no
+TOS01005485;Calzalunga;Suvereto;LI;Maremma-Costa;46;43.0674;10.72264;no
+TOS01002779;Campiano;Montieri;GR;Maremma-Costa;500;43.10246;11.03874;no
+TOS03002420;Campiglia Marittima;Campiglia Marittima;LI;Maremma-Costa;190;43.05646;10.61611;no
+TOS11000006;Capalbio;Capalbio;GR;Maremma-Costa;12;42.4054;11.39157;no
+TOS03003145;Capraia Isola;Capraia Isola;LI;Maremma-Costa;274;43.06257;9.82142;no
+TOS11000013;Casotto dei Pescatori;Grosseto;GR;Maremma-Costa;2;42.76862;11.01595;no
+TOS11000069;Castagneto Carducci;Castagneto Carducci;LI;Maremma-Costa;95;43.18914;10.62772;no
+TOS03002515;Casteani;Gavorrano;GR;Maremma-Costa;59;42.98147;10.97884;no
+TOS11000002;Cecina;Cecina;LI;Maremma-Costa;60;43.35164;10.52275;no
+TOS11000036;Collesalvetti;Collesalvetti;LI;Maremma-Costa;15;43.58384;10.46672;no
+TOS11000003;Donoratico;Castagneto Carducci;LI;Maremma-Costa;36;43.22363;10.5958;no
+TOS03002459;Follonica;Follonica;GR;Maremma-Costa;15;42.9331;10.7654;no
+TOS01002071;Gerfalco;Montieri;GR;Maremma-Costa;740;43.14268;10.97386;no
+TOS03003269;Giglio Castello;Isola del Giglio;GR;Maremma-Costa;470;42.35848;10.90682;no
+TOS11000107;Gorgona;Livorno;LI;Maremma-Costa;230;43.42806;9.89468;no
+TOS01002351;Lago;Monterotondo Marittimo;GR;Maremma-Costa;315;43.15499;10.80723;no
+TOS01005981;Livorno Mareografo;Livorno;LI;Maremma-Costa;0;43.54626;10.29963;no
+TOS11000050;Massa Marittima Filetto;Massa Marittima;GR;Maremma-Costa;670;43.12167;10.92228;no
+TOS11000041;Massa Marittima Valpiana;Massa Marittima;GR;Maremma-Costa;188;43.02095;10.86539;no
+TOS11000511;Monte Perone;Campo nell'Elba;LI;Maremma-Costa;713;42.77479;10.19108;no
+TOS03003267;Montecristo;Portoferraio;LI;Maremma-Costa;85;42.3325;10.2911;no
+TOS01002371;Monterotondo;Monterotondo Marittimo;GR;Maremma-Costa;595;43.14596;10.86278;no
+TOS11000508;Orbetello;Orbetello;GR;Maremma-Costa;0;42.43445;11.20263;no
+TOS03001930;Parrana S. Martino;Collesalvetti;LI;Maremma-Costa;119;43.53723;10.44169;no
+TOS03003200;Patresi Mortigliano;Marciana;LI;Maremma-Costa;110;42.78547;10.1111;no
+TOS03003011;Poggio Perotto;Magliano in Toscana;GR;Maremma-Costa;82;42.61368;11.25488;no
+TOS03002961;Ponte Tura;Grosseto;GR;Maremma-Costa;13;42.7647;11.16625;no
+TOS03002300;Populonia;Piombino;LI;Maremma-Costa;164;42.9894;10.4901;no
+TOS11000012;Portoferraio;Portoferraio;LI;Maremma-Costa;10;42.79574;10.36011;no
+TOS03002073;Prata;Massa Marittima;GR;Maremma-Costa;528;43.07583;10.98506;no
+TOS11000513;Quercianella;Livorno;LI;Maremma-Costa;244;43.47956;10.34769;no
+TOS11000005;Rispescia;Grosseto;GR;Maremma-Costa;25;42.70617;11.14455;no
+TOS03002531;Roccastrada;Roccastrada;GR;Maremma-Costa;504;43.01628;11.16519;no
+TOS11000015;Roccatederighi;Roccastrada;GR;Maremma-Costa;475;43.03283;11.06382;no
+TOS03005355;Rosignano Solvay Pluvio;Rosignano Marittimo;LI;Maremma-Costa;2;43.38222;10.43305;no
+TOS03003099;S. Donato;Orbetello;GR;Maremma-Costa;21;42.55374;11.23708;no
+TOS03002476;S. Ferdinando;Massa Marittima;GR;Maremma-Costa;334;43.07007;10.81483;no
+TOS03003179;S. Martino;Portoferraio;LI;Maremma-Costa;320;42.78221;10.26916;no
+TOS11000035;S. Vincenzo;San Vincenzo;LI;Maremma-Costa;14;43.05247;10.55572;no
+TOS03002283;S. Vincenzo porto;San Vincenzo;LI;Maremma-Costa;1;43.09826;10.53686;no
+TOS01002381;Sassetta;Sassetta;LI;Maremma-Costa;351;43.12413;10.63987;no
+TOS01005342;Stagno;Collesalvetti;LI;Maremma-Costa;2;43.59997;10.35213;no
+TOS11000042;Stiacciole;Grosseto;GR;Maremma-Costa;53;42.78885;11.17577;no
+TOS11000070;Suvereto;Suvereto;LI;Maremma-Costa;35;43.06573;10.6856;no
+TOS01001961;Valle Benedetta;Livorno;LI;Maremma-Costa;300;43.5212;10.40384;no
+TOS01005489;Vecchia SS Aurelia;Campiglia Marittima;LI;Maremma-Costa;12;43.01901;10.61396;no
+TOS11000004;Venturina;Piombino;LI;Maremma-Costa;8;42.99347;10.64069;no
+TOS30287500;Barco;Firenzuola;FI;Mugello-Alto Mugello;780;44.05417;11.392;no
+TOS30248000;Bibbiana;Palazzuolo sul Senio;FI;Mugello-Alto Mugello;786;44.12417;11.50767;no
+TOS01000999;Borgo S. Lorenzo;Borgo San Lorenzo;FI;Mugello-Alto Mugello;196;43.95788;11.39051;no
+TOS11000017;Borgo S. Lorenzo 2;Borgo San Lorenzo;FI;Mugello-Alto Mugello;280;43.98621;11.38971;no
+TOS30248400;Casaglia;Borgo San Lorenzo;FI;Mugello-Alto Mugello;749;44.037;11.51767;no
+TOS01000911;Cavallina;Barberino di Mugello;FI;Mugello-Alto Mugello;256;43.98357;11.23742;no
+TOS01001041;Consuma;Rufina;FI;Mugello-Alto Mugello;955;43.78447;11.5852;no
+TOS01001029;Dicomano;Dicomano;FI;Mugello-Alto Mugello;148;43.88829;11.51986;no
+TOS30290300;Firenzuola;Firenze;FI;Mugello-Alto Mugello;431;44.11983;11.3755;no
+TOS11000108;Giogo;Firenzuola;FI;Mugello-Alto Mugello;880;44.04738;11.38933;no
+TOS01000926;Le Croci (Barberino);Barberino di Mugello;FI;Mugello-Alto Mugello;388;44.00703;11.27125;no
+TOS01000921;Mangona;Barberino di Mugello;FI;Mugello-Alto Mugello;540;44.05006;11.19564;no
+TOS30250000;Marradi;Marradi;FI;Mugello-Alto Mugello;323;44.07428;11.60927;no
+TOS30287700;Monte Faggiola;Firenzuola;FI;Mugello-Alto Mugello;882;44.13633;11.49267;no
+TOS03001001;Monte Giovi;Vicchio;FI;Mugello-Alto Mugello;960;43.87686;11.44753;no
+TOS01000916;Monte di Fò;Barberino di Mugello;FI;Mugello-Alto Mugello;820;44.07963;11.28085;no
+TOS30290400;Palazzuolo sul Senio;Firenze;FI;Mugello-Alto Mugello;496;44.10967;11.54217;no
+TOS11000089;Pelago;Pelago;FI;Mugello-Alto Mugello;325;43.75904;11.50243;no
+TOS30290200;Piancaldoli;Firenzuola;FI;Mugello-Alto Mugello;496;44.21511;11.43277;no
+TOS01000931;Ponte a Olmo;Scarperia e San Piero;FI;Mugello-Alto Mugello;459;44.04916;11.30441;no
+TOS01000979;Razzuolo;Borgo San Lorenzo;FI;Mugello-Alto Mugello;637;44.03158;11.46773;no
+TOS01000991;Ronta;Borgo San Lorenzo;FI;Mugello-Alto Mugello;380;44.00905;11.43641;no
+TOS01000961;S. Agata di Mugello;Scarperia e San Piero;FI;Mugello-Alto Mugello;357;44.02069;11.33721;no
+TOS01004621;S. Piero a Sieve-Sieve;Scarperia e San Piero;FI;Mugello-Alto Mugello;222;43.96511;11.32801;no
+TOS01000941;Vaglia;Vaglia;FI;Mugello-Alto Mugello;340;43.90834;11.27486;no
+TOS01001011;Villore;Vicchio;FI;Mugello-Alto Mugello;365;43.96431;11.54104;no
+TOS02004369;Bocca di Serchio;San Giuliano Terme;PI;Pisano;0;43.78136;10.26973;no
+TOS01005251;Bocca d�Arno;Pisa;PI;Pisano;1;43.68073;10.28035;no
+TOS03005379;Bulera;Pomarance;PI;Pisano;0;43.26802;10.91256;no
+TOS01002171;Canneto;Monteverdi Marittimo;PI;Pisano;300;43.20234;10.73931;no
+TOS01005131;Capannoli;Capannoli;PI;Pisano;29;43.59228;10.68442;no
+TOS01001781;Casciana Terme;Casciana Terme Lari;PI;Pisano;135;43.52699;10.61276;no
+TOS11000056;Castelnuovo Val di Cecina;Castelnovo di Val di Cecina;PI;Pisano;770;43.20424;10.88058;no
+TOS03001802;Cimone - Monte Serra;Calci;PI;Pisano;705;43.73067;10.55333;no
+TOS01001831;Coltano;Pisa;PI;Pisano;5;43.63796;10.39091;no
+TOS01005005;Fornacino;San Miniato;PI;Pisano;50;43.63155;10.84985;no
+TOS01005262;Gello;Pontedera;PI;Pisano;5;43.65162;10.58797;no
+TOS01001679;La Madonnina;Volterra;PI;Pisano;607;43.44185;10.95288;no
+TOS11000507;Legoli;Peccioli;PI;Pisano;180;43.56523;10.80064;no
+TOS01002161;Libbiano;Pomarance;PI;Pisano;440;43.28129;10.80719;no
+TOS11000001;Metato;San Giuliano Terme;PI;Pisano;3;43.77094;10.38378;no
+TOS01002011;Miemo;Montecatini Val di Cecina;PI;Pisano;420;43.41019;10.6707;no
+TOS01005115;Molino d�Era;Volterra;PI;Pisano;101;43.45563;10.83013;no
+TOS11000020;Monte Serra;Calci;PI;Pisano;890;43.74707;10.55446;no
+TOS01002131;Montecatini V. Cecina;Montecatini Val di Cecina;PI;Pisano;379;43.38698;10.74297;no
+TOS11000046;Montopoli;Montopoli in Val d'Arno;PI;Pisano;29;43.66784;10.74572;no
+TOS01001711;Orciatico;Lajatico;PI;Pisano;312;43.43445;10.72475;no
+TOS01001889;Orentano;Castelfranco di Sotto;PI;Pisano;22;43.77442;10.65708;no
+TOS01000544;Pisa (Fac. Agraria);Pisa;PI;Pisano;6;43.71117;10.412;no
+TOS01002115;Ponsano;Volterra;PI;Pisano;340;43.36531;10.99035;no
+TOS01005386;Ponte SR439;Pomarance;PI;Pisano;85;43.33417;10.85806;no
+TOS01005401;Ponte di Monterufoli;Guardistallo;PI;Pisano;33;43.32334;10.66982;no
+TOS01005181;Pontedera;Pontedera;PI;Pisano;11;43.66533;10.63124;no
+TOS02004311;Ripafratta;San Giuliano Terme;PI;Pisano;11;43.81886;10.41426;no
+TOS01002231;Riparbella;Riparbella;PI;Pisano;230;43.36744;10.60223;no
+TOS01005377;S. Dalmazio;Pomarance;PI;Pisano;247;43.25349;10.94357;no
+TOS01005191;S. Giovanni alla Vena valle;Vicopisano;PI;Pisano;8;43.68459;10.58534;no
+TOS03002001;S. Luce;Santa Luce;PI;Pisano;196;43.47238;10.56495;no
+TOS01001491;S. Miniato (Cimitero);San Miniato;PI;Pisano;102;43.68403;10.83148;no
+TOS11000045;S. Miniato Poggio al Pino;San Miniato;PI;Pisano;117;43.6795;10.89355;no
+TOS11000010;Santermo;Casciana Terme Lari;PI;Pisano;210;43.53204;10.57835;no
+TOS01002181;Sassa;Montecatini Val di Cecina;PI;Pisano;398;43.25796;10.69137;no
+TOS11000063;Siberia;Crespina Lorenzana;PI;Pisano;41;43.59164;10.54375;no
+TOS11000016;Terricciola;Terricciola;PI;Pisano;127;43.54182;10.64948;no
+TOS02004365;Vecchiano;Vecchiano;PI;Pisano;6;43.78051;10.39889;no
+TOS03001665;Volterra Balze;Volterra;PI;Pisano;450;43.4126;10.85101;no
+TOS01000811;Badia Agnano;Bucine;AR;Pratomagno-Valdarno;261;43.43639;11.64879;no
+TOS11000516;Casa Rota;Terranuova Bracciolini;AR;Pratomagno-Valdarno;200;43.58551;11.54329;no
+TOS11000083;Castiglion Fibocchi;Castiglion Fibocchi;AR;Pratomagno-Valdarno;283;43.5338;11.74358;no
+TOS01000891;Il Palagio;Figline e Incisa Valdarno;FI;Pratomagno-Valdarno;315;43.61266;11.42722;no
+TOS01004591;Incisa Valle;Figline e Incisa Valdarno;FI;Pratomagno-Valdarno;109;43.68985;11.45619;no
+TOS01004571;Montevarchi;Montevarchi;AR;Pratomagno-Valdarno;134;43.54121;11.56621;no
+TOS01000881;Pian di Scò;Castelfranco Piandiscò;AR;Pratomagno-Valdarno;395;43.64996;11.55515;no
+TOS11000078;Pratomagno;Loro Ciuffenna;AR;Pratomagno-Valdarno;695;43.56953;11.72422;no
+TOS03000855;Trappola;Loro Ciuffena;AR;Pratomagno-Valdarno;869;43.61899;11.65264;no
+TOS01000901;Vallombrosa;Reggello;FI;Pratomagno-Valdarno;980;43.73137;11.55682;no
+TOS01000861;Villa dell�Olio;Loro Ciuffenna;AR;Pratomagno-Valdarno;300;43.59143;11.60408;no
+TOS01002085;Anqua;Radicondoli;SI;Senese;440;43.21524;10.98731;no
+TOS01000721;Bettolle;Sinalunga;SI;Senese;292;43.20291;11.8035;no
+TOS03001286;Castellina in Chianti;Castellina in Chianti;SI;Senese;572;43.47316;11.28843;no
+TOS11000019;Castelnuovo B.ga;Gaiole in Chianti;SI;Senese;300;43.36973;11.4232;no
+TOS11000087;Gaiole in Chianti;Gaiole in Chianti;SI;Senese;360;43.45651;11.42151;no
+TOS03002643;Madonna a Brolio;Castelnuovo Berardenga;SI;Senese;440;43.41447;11.45572;no
+TOS03001385;Mensano;Casole d'Elsa;SI;Senese;365;43.29138;11.07115;no
+TOS03002613;Monastero d�Ombrone;Castelnuovo Berardenga;SI;Senese;222;43.32916;11.55552;no
+TOS03002733;Montalcinello;Chiusdino;SI;Senese;380;43.20311;11.07662;no
+TOS03002621;Monte Oliveto;Asciano;SI;Senese;267;43.17548;11.54547;no
+TOS03000691;Montepulciano;Montepulciano;SI;Senese;450;43.11273;11.7937;no
+TOS11000113;Montepulciano Azienda;Montepulciano;SI;Senese;335;43.08509;11.84443;no
+TOS11000082;Monteroni Arbia Biena;Monteroni d'Arbia;SI;Senese;165;43.24301;11.41689;no
+TOS03002742;Monticiano La Pineta;Monticiano;SI;Senese;450;43.13437;11.24202;no
+TOS03002888;Montisi;Montalcino;SI;Senese;400;43.15473;11.64975;no
+TOS01000831;Nusenna in Chianti;Gaiole in Chianti;SI;Senese;560;43.45035;11.53126;no
+TOS11000080;Pentolina;Chiusdino;SI;Senese;450;43.2085;11.1799;no
+TOS01004965;Poggibonsi;Poggibonsi;SI;Senese;88;43.47146;11.12876;no
+TOS03005707;Ponte Orgia;Sovicille;SI;Senese;0;43.21465;11.25811;no
+TOS01001284;Radda in Chianti;Radda in Chianti;SI;Senese;495;43.48603;11.37911;no
+TOS03000715;Rigomagno;Sinalunga;SI;Senese;395;43.26259;11.69526;no
+TOS01001419;S. Gimignano;San Gimignano;SI;Senese;306;43.47136;11.04129;no
+TOS11000025;Scorgiano;Monteriggioni;SI;Senese;233;43.36627;11.15143;no
+TOS01002661;Siena Poggio al Vento;Siena;SI;Senese;348;43.32045;11.31259;no
+TOS01001379;Simignano;Sovicille;SI;Senese;420;43.29205;11.16723;no
+TOS03002761;Sovicille;Sovicille;SI;Senese;260;43.27629;11.22986;no
+TOS03002640;Vagliagli;Castelnuovo Berardenga;SI;Senese;524;43.42074;11.34593;no
