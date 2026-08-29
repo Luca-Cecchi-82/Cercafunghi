@@ -43,8 +43,10 @@ GIORNI_AVANTI   = 7       # giorni di previsione del suolo
 GIORNI_PIOGGIA  = 80      # quanta pioggia scaricare, per le cumulate a 30 gg
 
 PAUSA_SIR = 0.6
-PAUSA_METEO = 1.5
+PAUSA_METEO = 3.0          # Open-Meteo limita la frequenza: meglio non correre
 STAZIONI_PER_CHIAMATA = 25
+TENTATIVI_METEO = 3        # quante volte riprovare un gruppo che fallisce
+TIMEOUT_METEO = 45         # secondi: se non risponde entro, e' inutile aspettare
 
 RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FILE_STAZIONI = os.path.join(RADICE, "stazioni.csv")
@@ -56,7 +58,8 @@ SIR_BASE = "http://www.sir.toscana.it/archivio/dati.php"
 SIR_SESSIONE = "http://www.sir.toscana.it/consistenza-rete"
 METEO_BASE = "https://api.open-meteo.com/v1/forecast"
 VARIABILI = ["temperature_2m", "soil_temperature_0_to_7cm",
-             "soil_temperature_7_to_28cm", "soil_moisture_7_to_28cm"]
+             "soil_temperature_7_to_28cm", "soil_moisture_7_to_28cm",
+             "soil_moisture_0_to_7cm"]
 
 INTESTAZIONI = {
     "Accept": "*/*",
@@ -156,30 +159,49 @@ def scarica_pioggia(stazioni, da):
 
 
 # ------------------------------------------------------------- Open-Meteo
+def chiedi_meteo(gruppo):
+    """Una chiamata a Open-Meteo, con piu' tentativi.
+    Open-Meteo limita la frequenza e quando siamo troppo veloci lascia
+    cadere la connessione invece di rispondere: riprovare risolve."""
+    par = {
+        "latitude": ",".join("%.5f" % s["lat"] for s in gruppo),
+        "longitude": ",".join("%.5f" % s["lon"] for s in gruppo),
+        "hourly": ",".join(VARIABILI),
+        "past_days": str(min(92, GIORNI_INDIETRO + 5)),
+        "forecast_days": str(GIORNI_AVANTI),
+        "timezone": "Europe/Rome",
+    }
+    url = METEO_BASE + "?" + urllib.parse.urlencode(par)
+    ultimo = None
+    for tentativo in range(1, TENTATIVI_METEO + 1):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "cercafunghi/1.0"})
+            with urllib.request.urlopen(req, timeout=TIMEOUT_METEO) as r:
+                risp = json.loads(r.read().decode("utf-8"))
+            return [risp] if isinstance(risp, dict) else risp
+        except Exception as e:
+            ultimo = e
+            if tentativo < TENTATIVI_METEO:
+                attesa = 5 * (2 ** (tentativo - 1))     # 5, 10, 20 secondi
+                log("      tentativo %d fallito (%s), riprovo fra %d s"
+                    % (tentativo, e, attesa))
+                time.sleep(attesa)
+    raise ultimo
+
+
 def scarica_suolo(stazioni):
     fuori = defaultdict(dict)
     gruppi = [stazioni[i:i + STAZIONI_PER_CHIAMATA]
               for i in range(0, len(stazioni), STAZIONI_PER_CHIAMATA)]
+    persi = 0
     for n, g in enumerate(gruppi, 1):
-        par = {
-            "latitude": ",".join("%.5f" % s["lat"] for s in g),
-            "longitude": ",".join("%.5f" % s["lon"] for s in g),
-            "hourly": ",".join(VARIABILI),
-            "past_days": str(min(92, GIORNI_INDIETRO + 5)),
-            "forecast_days": str(GIORNI_AVANTI),
-            "timezone": "Europe/Rome",
-        }
-        url = METEO_BASE + "?" + urllib.parse.urlencode(par)
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "cercafunghi/1.0"})
-            with urllib.request.urlopen(req, timeout=120) as r:
-                risp = json.loads(r.read().decode("utf-8"))
+            risp = chiedi_meteo(g)
         except Exception as e:
-            log("    gruppo %d/%d FALLITO: %s" % (n, len(gruppi), e))
-            time.sleep(PAUSA_METEO * 3)
+            log("    gruppo %d/%d PERSO dopo %d tentativi: %s"
+                % (n, len(gruppi), TENTATIVI_METEO, e))
+            persi += len(g)
             continue
-        if isinstance(risp, dict):
-            risp = [risp]
         for s, d in zip(g, risp):
             orario = d.get("hourly") or {}
             per_g = defaultdict(lambda: defaultdict(list))
@@ -190,7 +212,7 @@ def scarica_suolo(stazioni):
                     if k < len(serie) and serie[k] is not None:
                         per_g[gg][var].append(serie[k])
             for gg, vv in per_g.items():
-                voce = {var: (round(sum(v) / len(v), 2) if v else None)
+                voce = {var: (round(sum(v) / len(v), 3) if v else None)
                         for var, v in vv.items()}
                 aria = vv.get("temperature_2m") or []
                 voce["t_min"] = round(min(aria), 1) if aria else None
@@ -198,6 +220,8 @@ def scarica_suolo(stazioni):
                 fuori[s["c"]][gg] = voce
         log("    meteo %d/%d" % (n, len(gruppi)))
         time.sleep(PAUSA_METEO)
+    if persi:
+        log("  ATTENZIONE: %d stazioni senza dati del suolo" % persi)
     return fuori
 
 
@@ -227,8 +251,8 @@ def costruisci(stazioni, pioggia, suolo):
     for s in stazioni:
         S = suolo.get(s["c"], {})
         P = pioggia.get(s["c"], {})
-        if not S:
-            continue
+        if not S and not P:
+            continue          # nessun dato di nessun tipo: inutile tenerla
         for g, v in P.items():
             if v is not None and g <= oggi.isoformat() and g > ultima:
                 ultima = g
@@ -240,6 +264,7 @@ def costruisci(stazioni, pioggia, suolo):
         for chiave, var, dec in (("ts", "soil_temperature_7_to_28cm", 1),
                                  ("ts0", "soil_temperature_0_to_7cm", 1),
                                  ("sm", "soil_moisture_7_to_28cm", 3),
+                                 ("sm0", "soil_moisture_0_to_7cm", 3),
                                  ("ta", "temperature_2m", 1)):
             voce[chiave] = [q((S.get(g) or {}).get(var), dec) for g in date_app]
         voce["tmn"] = [q((S.get(g) or {}).get("t_min"), 1) for g in date_app]
@@ -286,7 +311,9 @@ def main():
         json.dump(dati, f, ensure_ascii=False, separators=(",", ":"))
 
     log("\n" + "-" * 56)
-    log("  stazioni scritte : %d" % len(dati["stazioni"]))
+    con_suolo = sum(1 for st in dati["stazioni"] if any(v is not None for v in st["ts"]))
+    log("  stazioni scritte : %d  (con dati del suolo: %d)"
+        % (len(dati["stazioni"]), con_suolo))
     log("  giorni           : %d  (%s -> %s)"
         % (len(dati["date"]), dati["date"][0], dati["date"][-1]))
     log("  ultima pioggia   : %s" % dati["ultima_pioggia"])
