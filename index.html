@@ -146,6 +146,11 @@ summary{cursor:pointer;font-family:'Zilla Slab',serif;font-size:15px;font-weight
 .bof.sugg{border-color:var(--accento);border-width:2.5px}
 .bof b{font-weight:700;opacity:.85;margin-right:4px;font-variant-numeric:tabular-nums}
 .boschi+.boschi{margin-top:10px}
+.voci{margin-top:12px;border:1px solid var(--curva);background:var(--carta2);padding:9px 13px}
+.voci summary{font-family:'Zilla Slab',serif;font-size:14px;font-weight:600;cursor:pointer}
+.voci-t{width:100%;min-width:0;font-size:11.5px;margin-top:9px;border-collapse:collapse}
+.voci-t td{text-align:left;white-space:normal;padding:4px 8px 4px 0;vertical-align:top;line-height:1.45;border-top:1px solid rgba(168,151,122,.5)}
+.voci-t td:first-child{font-weight:600;width:150px;white-space:nowrap}
 .caricamento{border:1.5px solid var(--inchiostro);background:var(--carta2);padding:14px 16px;margin-top:16px;font-family:'Zilla Slab',serif;font-size:15px;line-height:1.5}
 .bo-riga{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
 .bo-riga input{width:150px;accent-color:var(--accento)}
@@ -166,6 +171,7 @@ th{padding:5px 5px;white-space:normal;line-height:1.15;vertical-align:bottom}
 td{padding:4px 5px}
 th.num,td.num{text-align:right}
 th.idxh{width:44px;max-width:44px;font-size:9px}
+th.num{min-width:52px}
 td.idxc{width:44px;text-align:center;padding:4px 3px}
 .idx{min-width:26px;padding:1px 4px;font-size:11.5px}
 td.testo{text-align:left;white-space:normal;font-size:10.5px;line-height:1.35;min-width:170px;max-width:270px}
@@ -257,6 +263,27 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
     <button class="mini" id="xlsx">scarica in Excel</button>
     <button class="mini" id="csv">scarica in CSV</button>
   </div>
+
+  <details class="voci">
+    <summary>Che cosa sono le colonne</summary>
+    <table class="voci-t">
+      <tr><td>Dove cercare</td><td>Gli alberi con cui la specie forma micorriza, o su cui cresce. La colonna segue la specie che regge l&rsquo;indice, non necessariamente quella selezionata.</td></tr>
+      <tr><td>Versante consigliato</td><td>Da che parte spostarsi, ricavato confrontando la temperatura del suolo del giorno con la finestra della specie. Se il suolo &egrave; troppo caldo manda a nord, se &egrave; troppo freddo a sud.</td></tr>
+      <tr><td>T suolo 7&ndash;28</td><td>Temperatura media del giorno alla profondit&agrave; dove sta il micelio. &Egrave; la grandezza pi&ugrave; importante di tutte. Modellata.</td></tr>
+      <tr><td>T suolo 0&ndash;7</td><td>Temperatura dello strato superficiale. Reagisce in poche ore, mentre il profondo impiega giorni.</td></tr>
+      <tr><td>Umidit&agrave; 7&ndash;28</td><td>Acqua contenuta nel suolo profondo, in metri cubi d&rsquo;acqua per metro cubo di terra. Sotto 0,10 &egrave; secco, sopra 0,40 &egrave; saturo.</td></tr>
+      <tr><td>Umidit&agrave; 0&ndash;7</td><td>Acqua nella lettiera. Se questa &egrave; sotto 0,08 il fungo fatica a spuntare anche col profondo umido, e l&rsquo;indice viene ridotto di un quarto.</td></tr>
+      <tr><td>Pioggia del gg</td><td>Millimetri caduti nel giorno selezionato. Misurata dal pluviometro.</td></tr>
+      <tr><td>P7, P15, P30</td><td>Somma della pioggia dei 7, 15 e 30 giorni fino al giorno selezionato, incluso.</td></tr>
+      <tr><td>Antec.</td><td>P30 meno P15: quanta acqua c&rsquo;era gi&agrave; nel terreno <i>prima</i> dei quindici giorni recenti. Un valore vicino a zero significa suolo che partiva cotto.</td></tr>
+      <tr><td>Shock</td><td>Di quanti gradi &egrave; scesa la temperatura del suolo negli ultimi cinque giorni. Il calo brusco &egrave; il segnale che innesca la buttata; il segno meno indica che si sta raffreddando.</td></tr>
+      <tr><td>Innesco</td><td>Quanti giorni sono passati dall&rsquo;ultima pioggia significativa, cio&egrave; almeno 20 mm in due giorni. Ogni specie ha la sua latenza: prima o dopo quella finestra il punteggio cala.</td></tr>
+      <tr><td>Punteggio termico</td><td>Da 0 a 100, quanto la temperatura del suolo cade dentro la finestra della specie. Pesa 0,45 nell&rsquo;indice e sotto 25 fa scattare lo sbarramento.</td></tr>
+      <tr><td>Punteggio idrico</td><td>Da 0 a 100, combinazione di umidit&agrave; del suolo e pioggia dei 15 giorni. Pesa 0,40.</td></tr>
+      <tr><td>T aria</td><td>Media, minima e massima dell&rsquo;aria a 2 metri. Non entrano nell&rsquo;indice: servono per farsi un&rsquo;idea della giornata.</td></tr>
+    </table>
+    <p style="font-size:11.5px;color:#5E5646;margin:8px 0 0">Il calcolo completo, con tutte le soglie, &egrave; nella sezione qui sotto.</p>
+  </details>
 </div>
 <div class="doc">
 <h2>Come sono fatte le valutazioni</h2>
@@ -271,6 +298,7 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
 <tr><td>Temperatura suolo 7&ndash;28 cm</td><td>Open-Meteo (ERA5-Land / ICON)</td><td>Modellata</td><td>Nessuna rete pubblica italiana la misura in bosco</td></tr>
 <tr><td>Temperatura suolo 0&ndash;7 cm</td><td>Open-Meteo</td><td>Modellata</td><td>Strato superficiale, reagisce in ore anzich&eacute; in giorni</td></tr>
 <tr><td>Umidit&agrave; suolo 7&ndash;28 cm</td><td>Open-Meteo</td><td>Modellata</td><td>Contenuto volumetrico d&rsquo;acqua, m&sup3;/m&sup3;</td></tr>
+<tr><td>Umidit&agrave; suolo 0&ndash;7 cm</td><td>Open-Meteo</td><td>Modellata</td><td>La lettiera. Serve come freno: se &egrave; secca il carpoforo non riesce a spuntare</td></tr>
 <tr><td>Temperatura aria 2 m</td><td>Open-Meteo</td><td>Modellata</td><td>Media, minima e massima giornaliere</td></tr>
 <tr><td>Coordinate stazioni</td><td>Open Data Regione Toscana, GeoJSON SIR</td><td>Misurata</td><td>19 stazioni della rete TOS09 mancano dal file e sono geocodificate sul centro abitato: marcate <span class="flagap">&asymp;</span></td></tr>
 <tr><td>Boschi per specie arborea</td><td>Inventario Forestale della Toscana, WMS Geoscopio</td><td>Fotointerpretazione 1978 + rilievi anni &rsquo;90</td><td>Griglia 400 m. Distingue faggete, castagneti, cerrete, pinete. Solo visualizzazione</td></tr>
@@ -286,10 +314,14 @@ ANT  = P30 - P15   antecedente: quanta acqua c'era gia' prima
 Ts   = temperatura media giornaliera del suolo a 7-28 cm
 Ts0  = temperatura media giornaliera del suolo a 0-7 cm
 SM   = umidita' volumetrica del suolo a 7-28 cm  (m3/m3)
-SHOCK = Ts(giorno-5) - Ts(giorno)   caduta termica su 5 giorni
+SM0  = umidita' volumetrica del suolo a 0-7 cm, la lettiera
+SHOCK = Ts(giorno-5) - Ts(giorno)   caduta termica su 5 giorni.
+        Positivo = il suolo si sta raffreddando. E' il segnale che
+        innesca la buttata, piu' della temperatura assoluta.
 INNESCO = giorni trascorsi dall'ultimo evento di pioggia significativo,
           dove "significativo" = almeno 20 mm cumulati in 2 giorni,
-          cercato nei 30 giorni precedenti</pre>
+          cercato nei 30 giorni precedenti. Il micelio non fruttifica
+          subito: ogni specie ha la sua latenza.</pre>
 
 <h3>3. I quattro punteggi parziali</h3>
 <p>Ogni punteggio va da 0 a 100. Le funzioni sono trapezoidali: zero fuori dai limiti esterni, cento fra i limiti interni, rampa lineare in mezzo.</p>
@@ -300,7 +332,11 @@ INNESCO = giorni trascorsi dall'ultimo evento di pioggia significativo,
 <pre>I = 0,60 x punteggio(SM)  +  0,40 x punteggio(P15)
 
 punteggio(SM):   0 sotto 0,10 - 100 fra 0,20 e 0,35 - cala a 40 a 0,45
-punteggio(P15):  0 sotto 20 mm - 100 fra 60 e 200 mm - cala a 50 a 350 mm</pre>
+punteggio(P15):  0 sotto 20 mm - 100 fra 60 e 200 mm - cala a 50 a 350 mm
+
+poi il freno della lettiera:
+  se SM0 &lt; 0,08  allora  I = I x 0,75</pre>
+<p>Il freno sulla lettiera merita una parola. Il micelio vive a 7&ndash;28 cm, ma il carpoforo per uscire deve attraversare i primi centimetri: se quelli sono asciutti il fungo si ferma o resta stentato, anche con il profondo bagnato. &Egrave; il motivo per cui dopo qualche giorno di vento la buttata si spegne pur senza che sia cambiato niente in profondit&agrave;. L&rsquo;ho messo come <b>penalit&agrave; e non come premio</b>: contare l&rsquo;umidit&agrave; superficiale in positivo significherebbe pesare due volte la stessa acqua, visto che i due strati sono strettamente legati.</p>
 <p>La penalizzazione oltre i 200&nbsp;mm non &egrave; un vezzo: su suolo cotto dall&rsquo;estate una pioggia estrema ruscella invece di infiltrare, e nei compluvi satura fino all&rsquo;asfissia. L&rsquo;asse Bagnone&ndash;Iera con 400&nbsp;mm in agosto 2026 &egrave; il caso da manuale.</p>
 
 <p><b>Innesco (N)</b> &mdash; il tempo trascorso dall&rsquo;ultima pioggia significativa deve cadere nella finestra di latenza della specie. Il micelio non fruttifica subito: gli servono giorni.</p>
@@ -441,6 +477,9 @@ const SEL = [
 const PESI = {termico:0.45, idrico:0.40, innesco:0.10, stagione:0.05};
 const SBARRA_T = 25, SBARRA_MAX = 35;
 const SM_SOGLIE = [0.10, 0.20, 0.35, 0.45], SM_CODA = 40;
+/* lettiera secca: il micelio sta in profondita', ma il fungo per uscire
+   deve attraversare lo strato superficiale. Se sopra e' secco, aborta. */
+const SM0_SECCA = 0.08, SM0_PENALITA = 0.75;
 const P15_SOGLIE = [20, 60, 200, 350], P15_CODA = 50;
 const EVENTO_MM = 20, EVENTO_GG = 2, EVENTO_FINESTRA = 30;
 /* indice di gruppo: premia chi ha almeno una specie in condizione,
@@ -481,6 +520,8 @@ function valuta(st,i,sp){
   const T=trapezio(ts,sp.ts,0);
   const iSM=trapezio(sm,SM_SOGLIE,SM_CODA), iP=trapezio(p15,P15_SOGLIE,P15_CODA);
   let I = (iSM!==null&&iP!==null) ? 0.60*iSM+0.40*iP : (iSM!==null?iSM:iP);
+  const sm0=st.sm0?st.sm0[i]:null;
+  if(I!==null && sm0!==null && sm0!==undefined && sm0<SM0_SECCA) I*=SM0_PENALITA;
   const gi=innescoGiorni(st,i), N=pInnesco(gi,sp.lag);
   const S=sp.mesi.includes(+DATE[i].slice(5,7))?100:25;
   let tot=null;
@@ -552,7 +593,16 @@ function colore(v){
 }
 
 /* ---------------- stato ---------------- */
-let selIdx=0, gIdx=Math.max(0,DATE.indexOf(ULTIMA_PIOGGIA)), sel=null,
+function giornoIniziale(){
+  const oggi=new Date();
+  const iso=oggi.getFullYear()+'-'+String(oggi.getMonth()+1).padStart(2,'0')
+    +'-'+String(oggi.getDate()).padStart(2,'0');
+  let k=DATE.indexOf(iso);
+  if(k>=0) return k;
+  for(let j=DATE.length-1;j>=0;j--) if(DATE[j]<=iso) return j;   /* il piu' vicino nel passato */
+  return DATE.length-1;
+}
+let selIdx=0, gIdx=giornoIniziale(), sel=null,
     qmin=0, cerca='', sortk='tot', sortd=-1;
 const AREE=[...new Set(ST.map(s=>s.a))].sort();
 let attive=new Set(AREE);
@@ -890,8 +940,8 @@ function scheda(st){
   h+='<div class="pp-sec">Suolo (modellato)</div>';
   h+=riga('Temperatura 7\u201328 cm', fmt(st.ts[i],'\u00b0C'));
   h+=riga('Temperatura 0\u20137 cm', fmt(st.ts0[i],'\u00b0C'));
-  h+=riga('Caduta termica su 5 gg', shock===null?'\u2013':(shock>0?'\u2212':'+')+Math.abs(shock).toFixed(1)+' \u00b0C');
   h+=riga('Umidit\u00e0 7\u201328 cm', st.sm[i]===null?'\u2013':st.sm[i].toFixed(3)+' m\u00b3/m\u00b3');
+  h+=riga('Umidit\u00e0 0\u20137 cm (lettiera)', (st.sm0&&st.sm0[i]!==null&&st.sm0[i]!==undefined)?st.sm0[i].toFixed(3)+' m\u00b3/m\u00b3':'\u2013');
 
   h+='<div class="pp-sec">Pioggia (misurata, SIR)</div>';
   h+=riga('Del giorno', fmt(st.pio[i],'mm'));
@@ -899,7 +949,8 @@ function scheda(st){
   h+=riga('Ultimi 15 giorni', fmt(st.p15[i],'mm'));
   h+=riga('Ultimi 30 giorni', fmt(st.p30[i],'mm'));
   h+=riga('Antecedente (30\u221215)', fmt(ant,'mm'));
-  h+=riga('Ultimo evento \u226520 mm/2gg', va.gi===null?'oltre 30 giorni fa':va.gi+' giorni fa');
+  h+=riga('Giorni dall\u2019ultimo evento (innesco)', va.gi===null?'oltre 30':va.gi);
+  h+=riga('Caduta termica su 5 gg (shock)', shock===null?'\u2013':(shock>0?'\u2212':'+')+Math.abs(shock).toFixed(1)+' \u00b0C');
 
   h+='<div class="pp-sec">Aria (modellata)</div>';
   h+=riga('Media giornaliera', fmt(st.ta[i],'\u00b0C'));
@@ -1028,10 +1079,12 @@ function colonne(){
     c.push(['sp_'+sp.id, sp.nome.replace(/,? /g,'<br>'), 'idxh']); });
   c.push(['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
   [['ts','T suolo<br>7\u201328<br>\u00b0C'],['ts0','T suolo<br>0\u20137<br>\u00b0C'],
-   ['shock','Caduta<br>5 gg<br>\u00b0C'],['sm','Umid.<br>m\u00b3/m\u00b3'],
-   ['pio','Pioggia<br>gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
-   ['ant','Antec.<br>mm'],['gi','Gg da<br>evento'],['T','Term.'],['I','Idr.'],
-   ['ta','T aria<br>\u00b0C'],['tmn','T min<br>\u00b0C'],['tmx','T max<br>\u00b0C']]
+   ['sm','Umidit\u00e0<br>7\u201328<br>m\u00b3/m\u00b3'],['sm0','Umidit\u00e0<br>0\u20137<br>m\u00b3/m\u00b3'],
+   ['pio','Pioggia<br>del gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
+   ['ant','Antec.<br>mm'],
+   ['shock','Shock<br>caduta 5 gg<br>\u00b0C'],['gi','Innesco<br>gg da<br>evento'],
+   ['T','Punteggio<br>termico'],['I','Punteggio<br>idrico'],
+   ['ta','T aria<br>media<br>\u00b0C'],['tmn','T aria<br>min<br>\u00b0C'],['tmx','T aria<br>max<br>\u00b0C']]
    .forEach(([k,l])=>c.push([k,l,'num']));
   return c;
 }
@@ -1041,14 +1094,15 @@ function valori(st){
   const ant=(st.p30[i]!==null&&st.p15[i]!==null)?+(st.p30[i]-st.p15[i]).toFixed(1):null;
   const o={n:st.n,a:st.a,q:st.q,tot:indice(st),
     alberi:attiva.alberi, vers:versante(st,i,attiva).replace(/<[^>]+>/g,''),
-    ts:st.ts[i],ts0:st.ts0[i],shock:shock,sm:st.sm[i],pio:st.pio[i],
+    ts:st.ts[i],ts0:st.ts0[i],shock:shock,sm:st.sm[i],
+    sm0:(st.sm0?st.sm0[i]:null),pio:st.pio[i],
     p7:st.p7[i],p15:st.p15[i],p30:st.p30[i],ant:ant,gi:va.gi,T:va.T,I:va.I,
     ta:st.ta[i],tmn:st.tmn[i],tmx:st.tmx[i]};
   SPECIE.forEach(sp=>{ o['sp_'+sp.id]=vt.sp[sp.id].tot; });
   return o;
 }
 function cell(v,k){ if(v===null||v===undefined) return '\u2013';
-  if(k==='sm') return v.toFixed(3);
+  if(k==='sm'||k==='sm0') return v.toFixed(3);
   return (typeof v==='number'&&!Number.isInteger(v))?v.toFixed(1):v; }
 
 function vai(c){ const s=ST.find(z=>z.c===c); if(!s) return; sel=c;

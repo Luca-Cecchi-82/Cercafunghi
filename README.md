@@ -32,7 +32,9 @@ python scripts/aggiorna_dati.py
 ```
 
 Se il SIR non risponde, lo script riusa la pioggia già presente in `dati.json`
-invece di perderla, e aggiorna solo la parte modellata.
+invece di perderla, e aggiorna solo la parte modellata. Se Open-Meteo rifiuta
+una chiamata, riprova tre volte prima di rinunciare, e le stazioni rimaste
+senza dati del suolo restano comunque in mappa con la sola pioggia.
 
 ## Fonti
 
