@@ -52,6 +52,12 @@ RAMI_PREDEFINITI = ["A1"]
 GIORNI_INDIETRO = 45      # quanti giorni di storia mostrare nell'app
 GIORNI_AVANTI   = 7       # giorni di previsione del suolo
 GIORNI_PIOGGIA  = 80      # quanta pioggia scaricare, per le cumulate a 30 gg
+# Frazione minima di giorni con dato vero perche' una cumulata sia valida.
+# Senza questo controllo una finestra mezza vuota - i giorni futuri, dove
+# la pioggia misurata non esiste, o un buco nella serie SIR - restituisce
+# una somma parziale che l'app legge come "e' piovuto poco" invece che
+# come "il dato non c'e'".
+COPERTURA_CUMULATE = 0.8
 
 PAUSA_SIR = 0.6
 PAUSA_METEO = 3.0          # Open-Meteo limita la frequenza: meglio non correre
@@ -87,6 +93,8 @@ def leggi_config(ramo):
     cfg["_indietro"] = int(d.get("giorni_indietro", GIORNI_INDIETRO))
     cfg["_avanti"] = int(d.get("giorni_avanti", GIORNI_AVANTI))
     cfg["_pioggia"] = int(d.get("giorni_pioggia", GIORNI_PIOGGIA))
+    cfg["_copertura"] = float(d.get("copertura_minima_cumulate",
+                                    COPERTURA_CUMULATE))
     if not cfg.get("versione"):
         log("ERRORE: %s non contiene la stringa di versione" % percorso)
         sys.exit(1)
@@ -278,8 +286,19 @@ def costruisci(stazioni, pioggia, suolo, cfg):
     d1 = oggi + timedelta(cfg["_avanti"])
     date_app = [(d0 + timedelta(k)).isoformat() for k in range((d1 - d0).days + 1)]
 
+    copertura = cfg.get("_copertura", COPERTURA_CUMULATE)
+
     def somma(cod, giorno, n):
+        """Cumulata sugli n giorni che finiscono in 'giorno'.
+
+        Restituisce None se i giorni con dato vero sono meno della
+        frazione richiesta. Serve soprattutto per i giorni previsti:
+        li' la pioggia misurata non esiste ancora, la finestra si
+        svuota man mano che ci si allontana da oggi, e senza questo
+        controllo il punteggio idrico calerebbe da solo ogni giorno
+        per pura aritmetica, non per il meteo."""
         d = date.fromisoformat(giorno)
+        minimo = n * copertura
         tot = 0.0
         trovati = 0
         for k in range(n):
@@ -287,7 +306,7 @@ def costruisci(stazioni, pioggia, suolo, cfg):
             if v is not None:
                 tot += v
                 trovati += 1
-        return round(tot, 1) if trovati else None
+        return round(tot, 1) if trovati >= minimo else None
 
     def q(v, n=1):
         return None if v is None else round(v, n)
