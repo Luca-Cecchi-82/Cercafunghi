@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cercafunghi Toscana</title>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--carta:#E8E1D1;--carta2:#DED5C1;--inchiostro:#221E17;--curva:#A8977A;--accento:#8C2F16}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--carta);color:var(--inchiostro);font-family:'IBM Plex Mono',ui-monospace,monospace;
+ font-size:14px;line-height:1.55;
+ background-image:repeating-linear-gradient(0deg,transparent 0 39px,rgba(168,151,122,.16) 39px 40px),
+                  repeating-linear-gradient(90deg,transparent 0 39px,rgba(168,151,122,.16) 39px 40px)}
+.wrap{max-width:660px;margin:0 auto;padding:48px 20px 70px}
+h1{font-family:'Zilla Slab',Georgia,serif;font-size:clamp(28px,6vw,44px);font-weight:700;margin:0;line-height:1.05}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accento);font-weight:600;margin-bottom:10px}
+.tesi{font-family:'Zilla Slab',serif;font-size:17px;margin:14px 0 0;line-height:1.4}
+hr{border:0;border-top:1.5px solid var(--inchiostro);margin:24px 0}
+.rami{display:flex;flex-direction:column;gap:10px}
+a.ramo{display:block;border:1.5px solid var(--inchiostro);background:var(--carta2);padding:14px 16px;
+ text-decoration:none;color:var(--inchiostro)}
+a.ramo:hover{background:var(--inchiostro);color:var(--carta)}
+a.ramo b{font-family:'Zilla Slab',serif;font-size:19px;display:block}
+a.ramo span{font-size:12px;opacity:.8}
+.corrente{border-width:2.5px;border-color:var(--accento)}
+.tag{float:right;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accento);font-weight:600}
+.avviso{margin-top:22px;font-size:12.5px;color:#5E5646;line-height:1.7}
+.conto{margin-top:18px;font-size:12.5px;border:1px solid var(--curva);padding:9px 13px;background:var(--carta2)}
+button{font-family:inherit;font-size:11.5px;padding:3px 9px;border:1px solid var(--curva);
+ background:transparent;cursor:pointer;color:#4A4335;margin-left:8px}
+button:hover{border-color:var(--inchiostro)}
+</style></head><body>
+<div class="wrap">
+
+<div class="eyebrow">Regione Toscana &middot; 376 stazioni</div>
+<h1>Cercafunghi</h1>
+<p class="tesi">Individua le zone in cui, in un dato giorno, pioggia, temperatura e umidit&agrave; del suolo sono compatibili con la fruttificazione. Non dice dove ci sono i funghi: dice dove il bosco giusto avrebbe le condizioni giuste.</p>
+
+<hr>
+
+<div class="rami">
+  <a class="ramo corrente" href="A1/">
+    <span class="tag">versione corrente</span>
+    <b>A1 &mdash; impianto a stazioni</b>
+    <span>376 pluviometri del SIR, temperatura e umidit&agrave; del suolo modellate da Open-Meteo. Sette specie, cartografia forestale, dati aggiornati ogni notte.</span>
+  </a>
+</div>
+
+<div class="conto" id="conto">
+  Ti porto alla versione corrente fra <b id="secondi">4</b> secondi.
+  <button id="ferma">resta qui</button>
+</div>
+
+<p class="avviso">
+Ogni versione sta in una sottocartella e resta raggiungibile al suo indirizzo anche quando ne arrivano di nuove: le uscite vecchie non vengono sovrascritte.<br><br>
+Modello sperimentale, nessuna garanzia sui risultati. Raccogli solo quello che riconosci con certezza: in caso di dubbio rivolgiti a un ispettorato micologico ASL, il servizio &egrave; gratuito. Rispetta i regolamenti su tesserino, limiti di quantit&agrave; e aree protette.
+</p>
+
+</div>
+<script>
+var resta = 4, salta = false;
+var conto = setInterval(function(){
+  if(salta) return;
+  resta--;
+  document.getElementById('secondi').textContent = resta;
+  if(resta <= 0){ clearInterval(conto); location.replace('A1/'); }
+}, 1000);
+document.getElementById('ferma').onclick = function(){
+  salta = true; clearInterval(conto);
+  document.getElementById('conto').innerHTML =
+    'Rimando automatico annullato. Scegli tu la versione qui sopra.';
+};
+</script>
+</body></html>
