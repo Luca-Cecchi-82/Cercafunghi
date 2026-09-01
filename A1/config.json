@@ -1,1 +1,12 @@
-
+{
+  "versione": "A1.0",
+  "ramo": "A1",
+  "nome": "Cercafunghi Toscana",
+  "descrizione": "Impianto a stazioni: 376 pluviometri SIR, suolo modellato Open-Meteo",
+  "attiva": true,
+  "dati": {
+    "giorni_indietro": 45,
+    "giorni_avanti": 7,
+    "giorni_pioggia": 80
+  }
+}
