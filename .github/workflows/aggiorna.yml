@@ -10,6 +10,11 @@ on:
 permissions:
   contents: write
 
+env:
+  # Rami da ricostruire, separati da spazio. Per aggiungerne uno
+  # basta creare la sua cartella con config.json e scriverlo qui.
+  RAMI: "A1"
+
 jobs:
   aggiorna:
     runs-on: ubuntu-latest
@@ -23,17 +28,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Scarica i dati e ricostruisci dati.json
-        run: python scripts/aggiorna_dati.py
+      - name: Scarica i dati e ricostruisci i dati.json
+        run: python scripts/aggiorna_dati.py $RAMI
 
       - name: Salva il risultato
         run: |
           git config user.name "aggiornamento automatico"
           git config user.email "actions@github.com"
-          if git diff --quiet -- dati.json; then
+          for r in $RAMI; do
+            if [ -f "$r/dati.json" ]; then git add "$r/dati.json"; fi
+          done
+          if git diff --cached --quiet; then
             echo "Nessuna variazione: non committo niente."
           else
-            git add dati.json
-            git commit -m "Dati aggiornati al $(date +'%d/%m/%Y')"
+            git commit -m "Dati aggiornati al $(date +'%d/%m/%Y') - rami: $RAMI"
             git push
           fi
