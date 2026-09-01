@@ -16,6 +16,11 @@ h2{font-size:19px;font-weight:600}h3{font-size:16px;font-weight:600}
 .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accento);font-weight:600;margin-bottom:9px}
 .tesi{font-family:'Zilla Slab',serif;font-size:clamp(14px,1.8vw,17px);max-width:74ch;margin:10px 0 0;line-height:1.38}
 hr.rule{border:0;border-top:1.5px solid var(--inchiostro);margin:16px 0 0}
+/* invito a segnalare un'uscita: porta al modulo nella radice del sito */
+.segnala{display:inline-block;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;
+ padding:7px 12px;border:1.5px solid var(--accento);color:var(--accento);text-decoration:none;background:transparent}
+.segnala:hover{background:var(--accento);color:var(--carta)}
+.segnala b{font-weight:600}
 .sez{margin-top:22px}
 .sez-h{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
 .sez-h .nota{font-size:12px;color:#5E5646}
@@ -190,6 +195,7 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
 <h1>Cercafunghi</h1>
 <p class="tesi">Individua le zone in cui, in un dato giorno, le condizioni di <b>pioggia, temperatura e umidit&agrave; del suolo</b> sono compatibili con la fruttificazione. Non dice dove ci sono i funghi: dice dove il bosco giusto avrebbe le condizioni giuste.</p>
 <div class="ver" id="versione"></div>
+<a class="segnala" href="../segnala.html?da=A1"><b>Sei stato a funghi?</b> Registra l'uscita &mdash; anche se non hai trovato niente</a>
 <hr class="rule">
 
 <div id="caricamento" class="caricamento">Carico i dati delle stazioni…</div>
