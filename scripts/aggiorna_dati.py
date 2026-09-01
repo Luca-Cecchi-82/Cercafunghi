@@ -3,17 +3,25 @@
 """
 aggiorna_dati.py
 
-Ricostruisce "dati.json", il file che alimenta l'app Cercafunghi.
+Ricostruisce il dati.json di uno o piu' rami dell'app Cercafunghi.
 
 Fa tre cose:
   1. scarica dal SIR Toscana la pioggia giornaliera misurata
   2. scarica da Open-Meteo temperatura e umidita' del suolo, e l'aria
-  3. calcola le cumulate e scrive dati.json
+  3. calcola le cumulate e scrive <ramo>/dati.json
+
+Ogni ramo sta in una sua sottocartella e ha il suo <ramo>/config.json,
+da cui vengono letti la stringa di versione e i parametri della finestra
+temporale. La versione finisce dentro dati.json e da li' nell'app.
+
+Lo scarico dalle sorgenti avviene UNA VOLTA SOLA anche con piu' rami:
+cambia solo il montaggio, secondo la configurazione di ciascuno.
 
 Usa SOLO la libreria standard di Python 3: nessuna installazione.
 
 Uso:
-    python scripts/aggiorna_dati.py
+    python scripts/aggiorna_dati.py            (usa il ramo A1)
+    python scripts/aggiorna_dati.py A1 A2      (rami indicati)
 
 Se il SIR non risponde, riusa la pioggia gia' presente nel dati.json
 precedente invece di buttare via tutto.
@@ -38,6 +46,9 @@ from datetime import date, timedelta
 # IMPOSTAZIONI
 # ===========================================================================
 
+RAMI_PREDEFINITI = ["A1"]
+
+# valori usati se il config.json del ramo non li specifica
 GIORNI_INDIETRO = 45      # quanti giorni di storia mostrare nell'app
 GIORNI_AVANTI   = 7       # giorni di previsione del suolo
 GIORNI_PIOGGIA  = 80      # quanta pioggia scaricare, per le cumulate a 30 gg
@@ -50,7 +61,36 @@ TIMEOUT_METEO = 45         # secondi: se non risponde entro, e' inutile aspettar
 
 RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FILE_STAZIONI = os.path.join(RADICE, "stazioni.csv")
-FILE_USCITA   = os.path.join(RADICE, "dati.json")
+
+
+def cartella(ramo):
+    return os.path.join(RADICE, ramo)
+
+
+def file_config(ramo):
+    return os.path.join(cartella(ramo), "config.json")
+
+
+def file_dati(ramo):
+    return os.path.join(cartella(ramo), "dati.json")
+
+
+def leggi_config(ramo):
+    """Legge <ramo>/config.json. Se manca qualcosa usa i valori predefiniti."""
+    percorso = file_config(ramo)
+    if not os.path.exists(percorso):
+        log("ERRORE: manca %s" % percorso)
+        sys.exit(1)
+    with open(percorso, encoding="utf-8") as f:
+        cfg = json.load(f)
+    d = cfg.get("dati") or {}
+    cfg["_indietro"] = int(d.get("giorni_indietro", GIORNI_INDIETRO))
+    cfg["_avanti"] = int(d.get("giorni_avanti", GIORNI_AVANTI))
+    cfg["_pioggia"] = int(d.get("giorni_pioggia", GIORNI_PIOGGIA))
+    if not cfg.get("versione"):
+        log("ERRORE: %s non contiene la stringa di versione" % percorso)
+        sys.exit(1)
+    return cfg
 
 # ===========================================================================
 
@@ -159,7 +199,10 @@ def scarica_pioggia(stazioni, da):
 
 
 # ------------------------------------------------------------- Open-Meteo
-def chiedi_meteo(gruppo):
+FINESTRA = {"indietro": GIORNI_INDIETRO, "avanti": GIORNI_AVANTI}
+
+
+def chiedi_meteo(gruppo, etichetta):
     """Una chiamata a Open-Meteo, con piu' tentativi.
     Open-Meteo limita la frequenza e quando siamo troppo veloci lascia
     cadere la connessione invece di rispondere: riprovare risolve."""
@@ -167,8 +210,8 @@ def chiedi_meteo(gruppo):
         "latitude": ",".join("%.5f" % s["lat"] for s in gruppo),
         "longitude": ",".join("%.5f" % s["lon"] for s in gruppo),
         "hourly": ",".join(VARIABILI),
-        "past_days": str(min(92, GIORNI_INDIETRO + 5)),
-        "forecast_days": str(GIORNI_AVANTI),
+        "past_days": str(min(92, FINESTRA["indietro"] + 5)),
+        "forecast_days": str(FINESTRA["avanti"]),
         "timezone": "Europe/Rome",
     }
     url = METEO_BASE + "?" + urllib.parse.urlencode(par)
@@ -183,9 +226,11 @@ def chiedi_meteo(gruppo):
             ultimo = e
             if tentativo < TENTATIVI_METEO:
                 attesa = 5 * (2 ** (tentativo - 1))     # 5, 10, 20 secondi
-                log("      tentativo %d fallito (%s), riprovo fra %d s"
-                    % (tentativo, e, attesa))
+                log("    %s: tentativo %d fallito (%s), riprovo fra %d s"
+                    % (etichetta, tentativo, e, attesa))
                 time.sleep(attesa)
+            else:
+                log("    %s: tentativo %d fallito (%s)" % (etichetta, tentativo, e))
     raise ultimo
 
 
@@ -195,11 +240,12 @@ def scarica_suolo(stazioni):
               for i in range(0, len(stazioni), STAZIONI_PER_CHIAMATA)]
     persi = 0
     for n, g in enumerate(gruppi, 1):
+        etichetta = "gruppo %d/%d" % (n, len(gruppi))
         try:
-            risp = chiedi_meteo(g)
+            risp = chiedi_meteo(g, etichetta)
         except Exception as e:
-            log("    gruppo %d/%d PERSO dopo %d tentativi: %s"
-                % (n, len(gruppi), TENTATIVI_METEO, e))
+            log("    %s PERSO dopo %d tentativi: %s"
+                % (etichetta, TENTATIVI_METEO, e))
             persi += len(g)
             continue
         for s, d in zip(g, risp):
@@ -218,7 +264,7 @@ def scarica_suolo(stazioni):
                 voce["t_min"] = round(min(aria), 1) if aria else None
                 voce["t_max"] = round(max(aria), 1) if aria else None
                 fuori[s["c"]][gg] = voce
-        log("    meteo %d/%d" % (n, len(gruppi)))
+        log("    %s scaricato" % etichetta)
         time.sleep(PAUSA_METEO)
     if persi:
         log("  ATTENZIONE: %d stazioni senza dati del suolo" % persi)
@@ -226,10 +272,10 @@ def scarica_suolo(stazioni):
 
 
 # ---------------------------------------------------------------- montaggio
-def costruisci(stazioni, pioggia, suolo):
+def costruisci(stazioni, pioggia, suolo, cfg):
     oggi = date.today()
-    d0 = oggi - timedelta(GIORNI_INDIETRO)
-    d1 = oggi + timedelta(GIORNI_AVANTI)
+    d0 = oggi - timedelta(cfg["_indietro"])
+    d1 = oggi + timedelta(cfg["_avanti"])
     date_app = [(d0 + timedelta(k)).isoformat() for k in range((d1 - d0).days + 1)]
 
     def somma(cod, giorno, n):
@@ -271,15 +317,26 @@ def costruisci(stazioni, pioggia, suolo):
         voce["tmx"] = [q((S.get(g) or {}).get("t_max"), 1) for g in date_app]
         fuori.append(voce)
 
-    return {"date": date_app, "ultima_pioggia": ultima or date_app[0],
+    return {"versione": cfg["versione"], "ramo": cfg.get("ramo", ""),
+            "date": date_app, "ultima_pioggia": ultima or date_app[0],
             "aggiornato": oggi.isoformat(), "stazioni": fuori}
 
 
 def main():
+    rami = sys.argv[1:] or RAMI_PREDEFINITI
+    config = {r: leggi_config(r) for r in rami}
+    log("Rami da ricostruire: %s"
+        % ", ".join("%s (versione %s)" % (r, config[r]["versione"]) for r in rami))
+
+    # una sola finestra di scarico, la piu' ampia richiesta dai rami
+    FINESTRA["indietro"] = max(c["_indietro"] for c in config.values())
+    FINESTRA["avanti"] = max(c["_avanti"] for c in config.values())
+    giorni_pioggia = max(c["_pioggia"] for c in config.values())
+
     stazioni = leggi_stazioni()
     log("Stazioni: %d" % len(stazioni))
 
-    da_pioggia = (date.today() - timedelta(GIORNI_PIOGGIA)).isoformat()
+    da_pioggia = (date.today() - timedelta(giorni_pioggia)).isoformat()
 
     log("\n[1/3] Pioggia misurata dal SIR (ci vuole un po')...")
     try:
@@ -287,39 +344,47 @@ def main():
     except Exception as e:
         log("  SIR non disponibile: %s" % e)
         pioggia = {}
-        if os.path.exists(FILE_USCITA):
-            log("  riuso la pioggia del dati.json precedente")
-            vecchio = json.load(open(FILE_USCITA, encoding="utf-8"))
+        for r in rami:                       # riuso quella gia' pubblicata
+            if not os.path.exists(file_dati(r)):
+                continue
+            log("  riuso la pioggia gia' presente in %s/dati.json" % r)
+            vecchio = json.load(open(file_dati(r), encoding="utf-8"))
             date_v = vecchio.get("date", [])
             for st in vecchio.get("stazioni", []):
-                serie = {g: v for g, v in zip(date_v, st.get("pio", [])) if v is not None}
+                serie = {g: v for g, v in zip(date_v, st.get("pio", []))
+                         if v is not None}
                 if serie:
-                    pioggia[st["c"]] = serie
+                    pioggia.setdefault(st["c"], {}).update(serie)
+            break
         if not pioggia:
-            log("  nessuna pioggia disponibile: mi fermo senza toccare dati.json")
+            log("  nessuna pioggia disponibile: mi fermo senza toccare niente")
             sys.exit(1)
 
     log("\n[2/3] Suolo e aria da Open-Meteo...")
     suolo = scarica_suolo(stazioni)
     if not suolo:
-        log("  Open-Meteo non ha risposto: mi fermo senza toccare dati.json")
+        log("  Open-Meteo non ha risposto: mi fermo senza toccare niente")
         sys.exit(1)
 
-    log("\n[3/3] Monto dati.json...")
-    dati = costruisci(stazioni, pioggia, suolo)
-    with open(FILE_USCITA, "w", encoding="utf-8") as f:
-        json.dump(dati, f, ensure_ascii=False, separators=(",", ":"))
-
+    log("\n[3/3] Monto i file dei rami...")
+    for r in rami:
+        cfg = config[r]
+        dati = costruisci(stazioni, pioggia, suolo, cfg)
+        os.makedirs(cartella(r), exist_ok=True)
+        with open(file_dati(r), "w", encoding="utf-8") as f:
+            json.dump(dati, f, ensure_ascii=False, separators=(",", ":"))
+        con_suolo = sum(1 for st in dati["stazioni"]
+                        if any(v is not None for v in st["ts"]))
+        log("")
+        log("  ramo %s, versione %s" % (r, cfg["versione"]))
+        log("    stazioni scritte : %d  (con dati del suolo: %d)"
+            % (len(dati["stazioni"]), con_suolo))
+        log("    giorni           : %d  (%s -> %s)"
+            % (len(dati["date"]), dati["date"][0], dati["date"][-1]))
+        log("    ultima pioggia   : %s" % dati["ultima_pioggia"])
+        log("    file             : %s  (%.0f KB)"
+            % (file_dati(r), os.path.getsize(file_dati(r)) / 1024))
     log("\n" + "-" * 56)
-    con_suolo = sum(1 for st in dati["stazioni"] if any(v is not None for v in st["ts"]))
-    log("  stazioni scritte : %d  (con dati del suolo: %d)"
-        % (len(dati["stazioni"]), con_suolo))
-    log("  giorni           : %d  (%s -> %s)"
-        % (len(dati["date"]), dati["date"][0], dati["date"][-1]))
-    log("  ultima pioggia   : %s" % dati["ultima_pioggia"])
-    log("  file             : %s  (%.0f KB)"
-        % (FILE_USCITA, os.path.getsize(FILE_USCITA) / 1024))
-    log("-" * 56)
 
 
 if __name__ == "__main__":
