@@ -425,14 +425,28 @@ function mostraVersione(){
   const e=document.getElementById('versione');
   if(e) e.textContent='Ver. '+VERSIONE;
 }
-fetch('config.json?v='+Date.now())
+/* I due file si scaricano insieme, ma l'app parte solo quando sono
+   arrivati ENTRAMBI: i parametri dell'indice stanno nel config e
+   devono essere gia' applicati prima del primo calcolo.
+   Se config.json manca o e' rotto si prosegue lo stesso, con i
+   valori predefiniti scritti nel blocco PARAMETRI. */
+const pConfig = fetch('config.json?v='+Date.now())
   .then(r=>r.ok?r.json():null)
   .catch(()=>null)
-  .then(cfg=>{ if(cfg&&cfg.versione){ VERSIONE=cfg.versione; RAMO=cfg.ramo||''; mostraVersione(); } });
+  .then(cfg=>{
+    if(cfg){
+      if(cfg.versione){ VERSIONE=cfg.versione; RAMO=cfg.ramo||''; mostraVersione(); }
+      try{ applicaConfig(cfg); }
+      catch(err){ console.warn('config.json non applicato:', err); }
+    }
+    return cfg;
+  });
 
-fetch('dati.json?v='+Date.now())
-  .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-  .then(d=>{
+const pDati = fetch('dati.json?v='+Date.now())
+  .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+
+Promise.all([pConfig, pDati])
+  .then(([cfg, d])=>{
     DATI=d; DATE=d.date; ST=d.stazioni;
     ULTIMA_PIOGGIA=d.ultima_pioggia; AGGIORNATO=d.aggiornato||'';
     if(!VERSIONE){ VERSIONE=d.versione||''; RAMO=d.ramo||''; mostraVersione(); }
@@ -495,17 +509,80 @@ const SEL = [
  {id:'altri',   nome:'Altri funghi', sub:'ovolo, finferlo, chiodino', gruppo:'altri'}
 ].concat(SPECIE.map(s=>({id:s.id, nome:s.nome, sub:s.lat, sp:s})));
 
-const PESI = {termico:0.45, idrico:0.40, innesco:0.10, stagione:0.05};
-const SBARRA_T = 25, SBARRA_MAX = 35;
-const SM_SOGLIE = [0.10, 0.20, 0.35, 0.45], SM_CODA = 40;
+/* ============================================================
+   PARAMETRI DELL'INDICE
+
+   I valori qui sotto sono solo i PREDEFINITI di sicurezza: servono
+   se config.json manca o e' malformato. I valori realmente usati
+   arrivano da A1/config.json, blocco "indice", e sostituiscono
+   questi all'avvio tramite applicaConfig().
+
+   Per regolare l'indice si modifica config.json, MAI questo blocco.
+
+   Provenienza dei valori: scelti a mano, non calibrati su
+   osservazioni di campo. Unica eccezione parziale la finestra di
+   pioggia a 15 giorni, che ha un aggancio in letteratura.
+   ============================================================ */
+let PESI = {termico:0.45, idrico:0.40, innesco:0.10, stagione:0.05};
+let SBARRA_T = 25, SBARRA_MAX = 35;
+let SM_SOGLIE = [0.10, 0.20, 0.35, 0.45], SM_CODA = 40;
 /* lettiera secca: il micelio sta in profondita', ma il fungo per uscire
-   deve attraversare lo strato superficiale. Se sopra e' secco, aborta. */
-const SM0_SECCA = 0.08, SM0_PENALITA = 0.75;
-const P15_SOGLIE = [20, 60, 200, 350], P15_CODA = 50;
-const EVENTO_MM = 20, EVENTO_GG = 2, EVENTO_FINESTRA = 30;
+   deve attraversare lo strato superficiale. Se sopra e' secco, aborta.
+   Per disattivare questa penalita' basta mettere penalita: 1.0 nel config. */
+let SM0_SECCA = 0.08, SM0_PENALITA = 0.75;
+let P15_SOGLIE = [20, 60, 200, 350], P15_CODA = 50;
+let EVENTO_MM = 20, EVENTO_GG = 2, EVENTO_FINESTRA = 30;
 /* indice di gruppo: premia chi ha almeno una specie in condizione,
    ma tiene conto anche di quante ne sono in condizione insieme */
-const GRUPPO_MAX = 0.70, GRUPPO_MEDIA = 0.30;
+let GRUPPO_MAX = 0.70, GRUPPO_MEDIA = 0.30;
+/* come si pesano fra loro umidita' del suolo e pioggia cumulata */
+let MIX_SM = 0.60, MIX_P = 0.40;
+
+/* Legge il blocco "indice" del config e sostituisce i predefiniti.
+   Ogni valore e' facoltativo: quelli assenti restano ai predefiniti,
+   cosi' un config incompleto non rompe niente. */
+function applicaConfig(cfg){
+  const c = (cfg && cfg.indice) || null;
+  if(!c) return;
+  const num = (v,d)=> (typeof v==='number' && isFinite(v)) ? v : d;
+  const arr4 = (v,d)=> (Array.isArray(v) && v.length===4 &&
+                        v.every(x=>typeof x==='number' && isFinite(x))) ? v : d;
+  if(c.pesi){
+    PESI = {termico: num(c.pesi.termico, PESI.termico),
+            idrico:  num(c.pesi.idrico,  PESI.idrico),
+            innesco: num(c.pesi.innesco, PESI.innesco),
+            stagione:num(c.pesi.stagione,PESI.stagione)};
+  }
+  if(c.sbarra_termica){
+    SBARRA_T   = num(c.sbarra_termica.soglia,  SBARRA_T);
+    SBARRA_MAX = num(c.sbarra_termica.massimo, SBARRA_MAX);
+  }
+  if(c.umidita_profonda){
+    SM_SOGLIE = arr4(c.umidita_profonda.soglie, SM_SOGLIE);
+    SM_CODA   = num(c.umidita_profonda.coda,    SM_CODA);
+  }
+  if(c.umidita_superficiale){
+    SM0_SECCA    = num(c.umidita_superficiale.secca_sotto, SM0_SECCA);
+    SM0_PENALITA = num(c.umidita_superficiale.penalita,    SM0_PENALITA);
+  }
+  if(c.pioggia_15gg){
+    P15_SOGLIE = arr4(c.pioggia_15gg.soglie, P15_SOGLIE);
+    P15_CODA   = num(c.pioggia_15gg.coda,    P15_CODA);
+  }
+  if(c.evento_innesco){
+    EVENTO_MM       = num(c.evento_innesco.mm,       EVENTO_MM);
+    EVENTO_GG       = num(c.evento_innesco.giorni,   EVENTO_GG);
+    EVENTO_FINESTRA = num(c.evento_innesco.finestra, EVENTO_FINESTRA);
+  }
+  if(c.gruppo){
+    GRUPPO_MAX   = num(c.gruppo.peso_massimo, GRUPPO_MAX);
+    GRUPPO_MEDIA = num(c.gruppo.peso_medio,   GRUPPO_MEDIA);
+  }
+  if(c.mix_idrico){
+    MIX_SM = num(c.mix_idrico.peso_umidita, MIX_SM);
+    MIX_P  = num(c.mix_idrico.peso_pioggia, MIX_P);
+  }
+}
 
 /* ============================================================ */
 
@@ -540,7 +617,7 @@ function valuta(st,i,sp){
   const ts=st.ts[i], sm=st.sm[i], p15=st.p15[i];
   const T=trapezio(ts,sp.ts,0);
   const iSM=trapezio(sm,SM_SOGLIE,SM_CODA), iP=trapezio(p15,P15_SOGLIE,P15_CODA);
-  let I = (iSM!==null&&iP!==null) ? 0.60*iSM+0.40*iP : (iSM!==null?iSM:iP);
+  let I = (iSM!==null&&iP!==null) ? MIX_SM*iSM+MIX_P*iP : (iSM!==null?iSM:iP);
   const sm0=st.sm0?st.sm0[i]:null;
   if(I!==null && sm0!==null && sm0!==undefined && sm0<SM0_SECCA) I*=SM0_PENALITA;
   const gi=innescoGiorni(st,i), N=pInnesco(gi,sp.lag);
