@@ -146,6 +146,9 @@ summary{cursor:pointer;font-family:'Zilla Slab',serif;font-size:15px;font-weight
 .bof.sugg{border-color:var(--accento);border-width:2.5px}
 .bof b{font-weight:700;opacity:.85;margin-right:4px;font-variant-numeric:tabular-nums}
 .boschi+.boschi{margin-top:10px}
+.filtri-mappa{border:1.5px solid var(--inchiostro);background:var(--carta2);padding:11px 14px;margin-top:12px}
+.filtri-mappa .filtri{margin:0}
+.filtri-mappa .conteggio{margin-top:9px;padding-top:8px;border-top:1px solid var(--curva)}
 .voci{margin-top:12px;border:1px solid var(--curva);background:var(--carta2);padding:9px 13px}
 .voci summary{font-family:'Zilla Slab',serif;font-size:14px;font-weight:600;cursor:pointer}
 .voci-t{width:100%;min-width:0;font-size:11.5px;margin-top:9px;border-collapse:collapse}
@@ -214,6 +217,18 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
   <div id="map"></div>
   <div class="legenda" id="leg"></div>
 
+  <div class="filtri-mappa">
+    <div class="filtri">
+      <div class="fgrp" style="flex:1 1 470px">
+        <span class="flab">Area <button class="mini" id="tutteAree">tutte</button> <button class="mini" id="nessunaArea">nessuna</button></span>
+        <div class="chips" id="chipArea"></div>
+      </div>
+      <div class="fgrp"><span class="flab">Quota minima <span id="qv">0</span> m</span><input type="range" id="q" min="0" max="1600" step="50" value="0" style="width:150px"></div>
+      <div class="fgrp"><span class="flab">Cerca stazione</span><input type="search" id="cerca" placeholder="Orecchiella&hellip;"></div>
+    </div>
+    <div class="conteggio" id="cnt"></div>
+  </div>
+
   <div class="boschi">
     <h3>Inventario Forestale della Toscana &mdash; 1978</h3>
     <div class="nota" style="font-size:11.5px;color:#5E5646">Griglia a 400 m, datata e grossolana nel disegno, ma <b>distingue la specie arborea</b>: faggete, castagneti, cerrete, pinete. Accendine uno o pi&ugrave;. Bordo rosso sui boschi adatti alla specie selezionata. Sulla mappa ogni cella &egrave; marcata col suo <b>codice</b>, quello scritto in grassetto sui pulsanti.</div>
@@ -235,18 +250,6 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
     <div class="nota" style="margin-top:8px;font-size:11px">Sono riportate le classi utili alla ricerca. <a id="legenda-ufficiale" href="#" target="_blank" rel="noopener">Legenda completa del servizio</a> per tutte le altre.</div>
     <div id="bosco-info" class="nota" style="margin-top:6px;font-size:11.5px"></div>
   </div>
-</div>
-
-<div class="sez">
-  <div class="filtri">
-    <div class="fgrp" style="flex:1 1 470px">
-      <span class="flab">Area <button class="mini" id="tutteAree">tutte</button> <button class="mini" id="nessunaArea">nessuna</button></span>
-      <div class="chips" id="chipArea"></div>
-    </div>
-    <div class="fgrp"><span class="flab">Quota minima <span id="qv">0</span> m</span><input type="range" id="q" min="0" max="1600" step="50" value="0" style="width:150px"></div>
-    <div class="fgrp"><span class="flab">Cerca stazione</span><input type="search" id="cerca" placeholder="Orecchiella&hellip;"></div>
-  </div>
-  <div class="conteggio" id="cnt"></div>
 </div>
 
 <div class="sez">
@@ -408,13 +411,15 @@ Rispetta i regolamenti regionali e provinciali: tesserino dove previsto, limiti 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-let DATI, DATE, ST, ULTIMA_PIOGGIA, AGGIORNATO;
+let DATI, DATE, ST, ULTIMA_PIOGGIA, AGGIORNATO, VERSIONE, RAMO;
 
 fetch('dati.json?v='+Date.now())
   .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
   .then(d=>{
     DATI=d; DATE=d.date; ST=d.stazioni;
     ULTIMA_PIOGGIA=d.ultima_pioggia; AGGIORNATO=d.aggiornato||'';
+    VERSIONE=d.versione||''; RAMO=d.ramo||'';
+    if(VERSIONE) document.title='Cercafunghi '+VERSIONE+' \u2014 zone di raccolta';
     document.getElementById('caricamento').remove();
     avvia();
   })
@@ -1206,7 +1211,7 @@ function matrice(){
 document.getElementById('csv').onclick=()=>{
   const b=new Blob(['\ufeff'+matrice().map(r=>r.join(';')).join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(b);
-  a.download='cercafunghi_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.csv'; a.click();
+  a.download='cercafunghi_'+(VERSIONE||'')+'_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.csv'; a.click();
 };
 document.getElementById('xlsx').onclick=()=>{
   if(typeof XLSX==='undefined'){ alert('Libreria Excel non caricata: uso il CSV.'); document.getElementById('csv').click(); return; }
@@ -1216,13 +1221,14 @@ document.getElementById('xlsx').onclick=()=>{
   ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:m.length-1,c:m[0].length-1}})};
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Stazioni');
-  const meta=[['Cercafunghi Toscana'],['Giorno',DATE[gIdx]],['Selezione',SEL[selIdx].nome],
+  const meta=[['Cercafunghi Toscana'],['Versione',VERSIONE||'n.d.'],['Ramo',RAMO||'n.d.'],
+    ['Giorno',DATE[gIdx]],['Selezione',SEL[selIdx].nome],
     ['Ultimo giorno con pioggia misurata',ULTIMA_PIOGGIA],['Stazioni esportate',m.length-1],[],
     ['Pioggia','SIR Regione Toscana, misurata, prevalidata'],
     ['Suolo e aria','Open-Meteo (ERA5-Land, ICON), modellati'],
     ['Indice','0,45 termico + 0,40 idrico + 0,10 innesco + 0,05 stagionale, con sbarramento termico']];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(meta),'Info');
-  XLSX.writeFile(wb,'cercafunghi_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.xlsx');
+  XLSX.writeFile(wb,'cercafunghi_'+(VERSIONE||'')+'_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.xlsx');
 };
 
 /* tabella specie nella documentazione */
@@ -1242,7 +1248,7 @@ document.getElementById('colophon').innerHTML=
  +'Boschi: Inventario Forestale della Toscana 1978 e Uso e Copertura del Suolo 2019, WMS Geoscopio \u2014 Regione Toscana.<br>'
  +'Sfondi: OpenTopoMap (CC-BY-SA), OpenStreetMap contributors (ODbL), Esri World Imagery.<br>'
  +'Periodo coperto: '+DATE[0].split('-').reverse().join('/')+' \u2013 '+DATE[DATE.length-1].split('-').reverse().join('/')
- +' \u00b7 '+ST.length+' stazioni \u00b7 elaborazione sperimentale.'+(AGGIORNATO?'<br>Dati ricostruiti il '+AGGIORNATO.split('-').reverse().join('/')+'.':'');
+ +' \u00b7 '+ST.length+' stazioni \u00b7 elaborazione sperimentale.'+(AGGIORNATO?'<br>Dati ricostruiti il '+AGGIORNATO.split('-').reverse().join('/')+'.':'')+(VERSIONE?'<br>Versione <b>'+VERSIONE+'</b>'+(RAMO?', ramo '+RAMO:'')+'.':'');
 
 render(true);
 
