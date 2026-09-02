@@ -279,11 +279,12 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
     <summary>Che cosa sono le colonne</summary>
     <table class="voci-t">
       <tr><td>Dove cercare</td><td>Gli alberi con cui la specie forma micorriza, o su cui cresce. La colonna segue la specie che regge l&rsquo;indice, non necessariamente quella selezionata.</td></tr>
+      <tr><td>Azzerato da</td><td>Se la casella &egrave; piena, l&rsquo;indice di quella stazione &egrave; stato portato a zero da una <b>condizione necessaria</b> non rispettata, e il testo dice quale. Vuota significa che nessun veto &egrave; scattato. Vedi il punto 4.</td></tr>
       <tr><td>Versante consigliato</td><td>Da che parte spostarsi, ricavato confrontando la temperatura del suolo del giorno con la finestra della specie. Se il suolo &egrave; troppo caldo manda a nord, se &egrave; troppo freddo a sud.</td></tr>
       <tr><td>T suolo 7&ndash;28</td><td>Temperatura media del giorno alla profondit&agrave; dove sta il micelio. &Egrave; la grandezza pi&ugrave; importante di tutte. Modellata.</td></tr>
       <tr><td>T suolo 0&ndash;7</td><td>Temperatura dello strato superficiale. Reagisce in poche ore, mentre il profondo impiega giorni.</td></tr>
       <tr><td>Umidit&agrave; 7&ndash;28</td><td>Acqua contenuta nel suolo profondo, in metri cubi d&rsquo;acqua per metro cubo di terra. Sotto 0,10 &egrave; secco, sopra 0,40 &egrave; saturo.</td></tr>
-      <tr><td>Umidit&agrave; 0&ndash;7</td><td>Acqua nella lettiera. Se questa &egrave; sotto 0,08 il fungo fatica a spuntare anche col profondo umido, e l&rsquo;indice viene ridotto di un quarto.</td></tr>
+      <tr><td>Umidit&agrave; 0&ndash;7</td><td>Acqua nella lettiera. In questa versione <b>non entra nell&rsquo;indice</b>: resta in tabella perch&eacute; utile da guardare. Il motivo &egrave; spiegato al punto 3.</td></tr>
       <tr><td>Pioggia del gg</td><td>Millimetri caduti nel giorno selezionato. Misurata dal pluviometro.</td></tr>
       <tr><td>P7, P15, P30</td><td>Somma della pioggia dei 7, 15 e 30 giorni fino al giorno selezionato, incluso.</td></tr>
       <tr><td>Antec.</td><td>P30 meno P15: quanta acqua c&rsquo;era gi&agrave; nel terreno <i>prima</i> dei quindici giorni recenti. Un valore vicino a zero significa suolo che partiva cotto.</td></tr>
@@ -306,7 +307,7 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
 <table>
 <tr><th>Dato</th><th>Fonte</th><th>Natura</th><th>Nota</th></tr>
 <tr><td>Pioggia giornaliera</td><td>SIR &mdash; Servizio Idrologico Regionale, Regione Toscana</td><td>Misurata</td><td>Pluviometro a bascula. Aggregazione 0&ndash;24. Serve perch&eacute; i temporali estivi sono troppo piccoli perch&eacute; un modello li veda</td></tr>
-<tr><td>Temperatura suolo 7&ndash;28 cm</td><td>Open-Meteo (ERA5-Land / ICON)</td><td>Modellata</td><td>Nessuna rete pubblica italiana la misura in bosco</td></tr>
+<tr><td>Temperatura suolo 7&ndash;28 cm</td><td>Open-Meteo, endpoint previsioni</td><td>Modellata</td><td>Nessuna rete pubblica italiana la misura in bosco. Anche i giorni passati vengono da run precedenti dello stesso modello, non da rianalisi</td></tr>
 <tr><td>Temperatura suolo 0&ndash;7 cm</td><td>Open-Meteo</td><td>Modellata</td><td>Strato superficiale, reagisce in ore anzich&eacute; in giorni</td></tr>
 <tr><td>Umidit&agrave; suolo 7&ndash;28 cm</td><td>Open-Meteo</td><td>Modellata</td><td>Contenuto volumetrico d&rsquo;acqua, m&sup3;/m&sup3;</td></tr>
 <tr><td>Umidit&agrave; suolo 0&ndash;7 cm</td><td>Open-Meteo</td><td>Modellata</td><td>La lettiera. Serve come freno: se &egrave; secca il carpoforo non riesce a spuntare</td></tr>
@@ -342,12 +343,12 @@ INNESCO = giorni trascorsi dall'ultimo evento di pioggia significativo,
 <p><b>Idrico (I)</b> &mdash; combinazione di due misure della stessa cosa, una modellata e una misurata:</p>
 <pre>I = 0,60 x punteggio(SM)  +  0,40 x punteggio(P15)
 
-punteggio(SM):   0 sotto 0,10 - 100 fra 0,20 e 0,35 - cala a 40 a 0,45
-punteggio(P15):  0 sotto 20 mm - 100 fra 60 e 200 mm - cala a 50 a 350 mm
-
-poi il freno della lettiera:
-  se SM0 &lt; 0,08  allora  I = I x 0,75</pre>
-<p>Il freno sulla lettiera merita una parola. Il micelio vive a 7&ndash;28 cm, ma il carpoforo per uscire deve attraversare i primi centimetri: se quelli sono asciutti il fungo si ferma o resta stentato, anche con il profondo bagnato. &Egrave; il motivo per cui dopo qualche giorno di vento la buttata si spegne pur senza che sia cambiato niente in profondit&agrave;. L&rsquo;ho messo come <b>penalit&agrave; e non come premio</b>: contare l&rsquo;umidit&agrave; superficiale in positivo significherebbe pesare due volte la stessa acqua, visto che i due strati sono strettamente legati.</p>
+punteggio(SM):   0 sotto 0,15 - 100 fra 0,28 e 0,40 - cala a 40 a 0,50
+punteggio(P15):  0 sotto 40 mm - 100 fra 110 e 250 mm - cala a 50 a 400 mm</pre>
+<p>Le soglie sono state alzate rispetto alla versione precedente, dove il punteggio pieno arrivava gi&agrave; a 0,20 di umidit&agrave; e a 60&nbsp;mm di pioggia in quindici giorni. Erano valori troppo generosi: 0,20 &egrave; un terreno appena umido, ben sotto la capacit&agrave; di campo di un suolo forestale, e sessanta millimetri in quindici giorni a fine estate evaporano quasi per intero.</p>
+<p><b>Il freno sulla lettiera non c&rsquo;&egrave; pi&ugrave;.</b> Nella versione precedente, con umidit&agrave; superficiale sotto 0,08, il punteggio idrico veniva ridotto di un quarto. Il ragionamento era buono &mdash; il micelio vive in profondit&agrave; ma il carpoforo per uscire deve attraversare i primi centimetri &mdash; ma misurato sui dati reali non reggeva.</p>
+<p>Su 19.552 valori delle 376 stazioni, la situazione che quel freno voleva cogliere, cio&egrave; <i>superficie secca con profondit&agrave; umida</i>, si verifica <b>14 volte, lo 0,1% dei casi</b>. La correlazione fra i due strati &egrave; 0,73: quando la superficie &egrave; secca lo &egrave; anche il profondo, e il punteggio idrico sta gi&agrave; scendendo per conto suo. Il freno contava due volte lo stesso fatto.</p>
+<p>In pi&ugrave;, quasi un valore su cinque cade entro 0,02 dalla soglia, mentre lo strato superficiale varia fino a 0,04 da un giorno all&rsquo;altro: in quella fascia lo scatto era deciso dal rumore del modello, non dal terreno. Il fenomeno biologico resta reale; il dato di cui disponiamo non lo distingue.</p>
 <p>La penalizzazione oltre i 200&nbsp;mm non &egrave; un vezzo: su suolo cotto dall&rsquo;estate una pioggia estrema ruscella invece di infiltrare, e nei compluvi satura fino all&rsquo;asfissia. L&rsquo;asse Bagnone&ndash;Iera con 400&nbsp;mm in agosto 2026 &egrave; il caso da manuale.</p>
 
 <p><b>Innesco (N)</b> &mdash; il tempo trascorso dall&rsquo;ultima pioggia significativa deve cadere nella finestra di latenza della specie. Il micelio non fruttifica subito: gli servono giorni.</p>
@@ -358,12 +359,40 @@ cala linearmente fino a 0 a meta' finestra di distanza
 <p><b>Stagionale (S)</b> &mdash; 100 se il mese rientra nella stagione tipica della specie, 25 altrimenti. &Egrave; un correttivo debole apposta: le stagioni si stanno spostando e non voglio che il calendario schiacci i dati.</p>
 
 <h3>4. Come si compone l&rsquo;indice</h3>
-<pre>INDICE = 0,45 x T  +  0,40 x I  +  0,10 x N  +  0,05 x S
+<pre>INDICE = veti x ( 0,45 x T + 0,40 x I + 0,10 x N + 0,05 x S )
+
+dove veti vale 0 oppure 1
 
 poi sbarramento termico:
   se T &lt; 25  allora  INDICE = min(INDICE, 35)</pre>
+
+<p><b>Le condizioni necessarie.</b> &Egrave; la differenza principale rispetto al ramo A1, dove l&rsquo;indice era una semplice somma pesata. In una somma i termini si compensano: con temperatura perfetta e terreno arido da un mese, il solo punteggio termico portava a casa quarantacinque punti su cento, e quarantacinque sembrano condizioni discrete mentre la realt&agrave; &egrave; zero.</p>
+<p>Alcune condizioni non si compensano: se mancano, non escono funghi, punto. Qui sono tre.</p>
+<table>
+<tr><th>Condizione</th><th>Soglia</th><th>Da dove viene</th></tr>
+<tr><td>Aria troppo fredda o troppo calda</td><td>media di 5 giorni fuori dall&rsquo;intervallo impostato</td><td>osservazione, con limiti allargati</td></tr>
+<tr><td>Caldo senza pioggia</td><td>sopra la soglia della specie con meno di 1&nbsp;mm al giorno di media su 5 giorni</td><td>osservazione per <i>Boletus edulis</i>, estrapolata alle altre specie</td></tr>
+<tr><td>Siccit&agrave; prolungata</td><td>meno di 15&nbsp;mm in 30 giorni</td><td><b>stima</b>, non letteratura</td></tr>
+</table>
+<p>Le prime due vengono da uno studio decennale su 1905 carpofori di <i>Boletus edulis</i> censiti in faggete della Germania nord-occidentale fra il 2015 e il 2024. La fruttificazione &egrave; stata osservata fra 7 e 19&nbsp;&deg;C di temperatura dell&rsquo;aria mediata su cinque giorni, con ottimo attorno a 13,2, e <b>nessun carpoforo sopra 17,5&nbsp;&deg;C quando la pioggia media giornaliera stava sotto 1&nbsp;mm</b>. Sotto quella soglia termica, invece, i funghi uscivano regolarmente anche senza pioggia recente: non &egrave; il caldo a fermare tutto, &egrave; la combinazione con la siccit&agrave;.</p>
+<p>Le soglie qui usate sono <b>volutamente pi&ugrave; larghe del dato osservato</b>. Il valore per <i>edulis</i> &egrave; portato a 19&nbsp;&deg;C invece di 17,5, per due motivi: il dato viene da faggete del nord Europa, e soprattutto il modello non conosce ancora pendenza, esposizione e capacit&agrave; di ritenzione del terreno, cio&egrave; proprio i fattori che spostano il bilancio idrico locale. Finch&eacute; quelle variabili mancano, &egrave; giusto sbagliare per eccesso di prudenza.</p>
+<p>Un veto sbagliato &egrave; pi&ugrave; pericoloso di un peso sbagliato. Un peso sbagliato altera l&rsquo;ordine e prima o poi si nota; un veto sbagliato azzera una zona, non ci vai, e <b>non scopri mai di esserti perso una fruttata</b>. L&rsquo;errore diventa invisibile e si conferma da solo. Per questo tutte le soglie stanno nel file di configurazione e si possono spegnere in blocco.</p>
+<p>Un veto non scatta mai per dati mancanti, solo per dati che dicono di no. Quando un punteggio &egrave; azzerato, la scheda della stazione e la colonna <i>Azzerato da</i> ne indicano il motivo.</p>
+
+<p><b>La soglia del caldo cambia da specie a specie.</b> Un solo valore nel file di configurazione fissa il riferimento di <i>Boletus edulis</i>; le altre specie si spostano da l&igrave; con scarti fissi, ricavati dalla distanza fra la fine del loro ottimo termico e quella di <i>edulis</i>. Alzando o abbassando il valore di riferimento si sposta tutta la scala mantenendo le distanze.</p>
+<table>
+<tr><th>Specie</th><th>Scarto</th><th>Con riferimento a 19&nbsp;&deg;C</th></tr>
+<tr><td>Chiodino</td><td>&minus;4</td><td>15&nbsp;&deg;C</td></tr>
+<tr><td>Porcino dei pini</td><td>&minus;1</td><td>18&nbsp;&deg;C</td></tr>
+<tr><td><b>Porcino</b></td><td><b>0</b></td><td><b>19&nbsp;&deg;C</b></td></tr>
+<tr><td>Finferlo</td><td>+1</td><td>20&nbsp;&deg;C</td></tr>
+<tr><td>Porcino estatino</td><td>+2</td><td>21&nbsp;&deg;C</td></tr>
+<tr><td>Porcino nero</td><td>+5</td><td>24&nbsp;&deg;C</td></tr>
+<tr><td>Ovolo buono</td><td>+7</td><td>26&nbsp;&deg;C</td></tr>
+</table>
+<p>Solo la riga del porcino poggia su un&rsquo;osservazione. Le altre sono <b>estrapolazioni</b>: le finestre termiche delle altre specie sono a loro volta stime non calibrate, e la relazione fra temperatura dell&rsquo;aria e del suolo non &egrave; identica in faggeta e in lecceta. Il caso pi&ugrave; forzato &egrave; il chiodino, che &egrave; saprotrofo e non micorrizico: la logica del bilancio idrico vale comunque, ma per una via diversa. Per l&rsquo;ovolo la soglia di 26&nbsp;&deg;C viene raggiunta di rado dalla media su cinque giorni, quindi per lui il veto &egrave; pi&ugrave; formale che operativo.</p>
 <p>I pesi di innesco e stagione sono bassi apposta: in un dato giorno e su una regione piccola come la Toscana quei due punteggi sono quasi uguali per tutte le stazioni, quindi non distinguono niente. La capacità di discriminare sta tutta in <b>T</b> e <b>I</b>, che variano davvero da stazione a stazione.</p>
-<p>Lo sbarramento serve perch&eacute; la temperatura &egrave; una condizione <i>necessaria</i>: se il suolo &egrave; a 26&nbsp;&deg;C non escono porcini per quanta acqua sia caduta. Senza lo sbarramento una media pesata farebbe apparire buone le stazioni fradicie e calde, che sono le peggiori.</p>
+<p>Lo sbarramento sul punteggio termico resta dalla versione precedente e agisce sul suolo: se il suolo &egrave; a 26&nbsp;&deg;C non escono porcini per quanta acqua sia caduta. &Egrave; un limite pi&ugrave; morbido dei veti &mdash; non azzera, tiene sotto 35 &mdash; e continua a servire per i casi che i veti non intercettano, perch&eacute; quelli lavorano sull&rsquo;aria e questo sul suolo.</p>
 <p>Le stazioni con serie pluviometrica sospetta &mdash; molti giorni asciutti e cumulata quasi nulla mentre le vicine sono in doppia cifra &mdash; sono marcate <span class="flagsp">!</span> e portate a indice 0. Il confronto è con la mediana delle <b>cinque stazioni più vicine</b>: se qui la cumulata a 15 giorni è sotto 4 mm mentre intorno supera 45 mm, il pluviometro è quasi certamente fuori servizio.</p>
 
 <h3>5. Le due selezioni generiche</h3>
@@ -385,6 +414,7 @@ poi sbarramento termico:
 
 <h3>7. Le specie e le loro soglie</h3>
 <div id="tabspecie"></div>
+<p>La colonna <b>Veto caldo</b> &egrave; la temperatura dell&rsquo;aria, mediata su cinque giorni, oltre la quale l&rsquo;indice della specie viene azzerato se nello stesso periodo &egrave; caduto meno di 1&nbsp;mm di pioggia al giorno. Deriva dal valore di riferimento del porcino spostato dello scarto indicato al punto 4.</p>
 <p>Le soglie termiche derivano dalla letteratura micologica corrente sulle esigenze ecologiche di ciascuna specie. Sono valori indicativi: la variabilit&agrave; fra popolazioni locali &egrave; alta, e su suoli e coperture diverse la stessa specie si comporta diversamente. <b>Sono il primo parametro da rivedere con un micologo che conosca le vostre zone.</b></p>
 
 <h3>8. Che cosa non c&rsquo;&egrave; nel modello</h3>
@@ -569,9 +599,26 @@ let VETI_ATTIVI    = true;
 let VETO_TA_MIN    = 5;      // gradi, aria media su piu' giorni
 let VETO_TA_MAX    = 21;     // gradi
 let VETO_TA_GIORNI = 5;      // su quanti giorni mediare l'aria
-let VETO_CALDO     = 17.5;   // sopra questa aria media...
+let VETO_CALDO     = 19;     // sopra questa aria media... (riferita a edulis)
 let VETO_CALDO_MM  = 1;      // ...serve almeno questa pioggia al giorno
 let VETO_P30_MM    = 15;     // pioggia minima in 30 giorni (stima)
+
+/* Scarti in gradi rispetto alla soglia di Boletus edulis, che vale 0.
+   Un'unica manopola nel config - caldo_sopra - alza o abbassa tutta la
+   scala mantenendo le distanze fra le specie.
+   Ricavati dallo scarto fra la fine dell'ottimo termico del suolo di
+   ciascuna specie e quella di edulis. ESTRAPOLAZIONE: il dato osservato
+   riguarda solo edulis. */
+let VETO_CALDO_SCARTO = {
+  armillaria:-4, pinophilus:-1, edulis:0,
+  cantharellus:1, aestivalis:2, aereus:5, caesarea:7
+};
+
+/* soglia del veto caldo per una singola specie */
+function caldoSpecie(sp){
+  const s = (sp && VETO_CALDO_SCARTO[sp.id]) || 0;
+  return VETO_CALDO + s;
+}
 
 /* Legge il blocco "indice" del config e sostituisce i predefiniti.
    Ogni valore e' facoltativo: quelli assenti restano ai predefiniti,
@@ -625,6 +672,11 @@ function applicaConfig(cfg){
     VETO_CALDO     = num(c.veti.caldo_sopra,     VETO_CALDO);
     VETO_CALDO_MM  = num(c.veti.caldo_pioggia_mm,VETO_CALDO_MM);
     VETO_P30_MM    = num(c.veti.pioggia_30gg_mm, VETO_P30_MM);
+    if(c.veti.caldo_scarto_specie){
+      Object.keys(VETO_CALDO_SCARTO).forEach(function(k){
+        VETO_CALDO_SCARTO[k] = num(c.veti.caldo_scarto_specie[k], VETO_CALDO_SCARTO[k]);
+      });
+    }
   }
 }
 
@@ -674,7 +726,7 @@ function mediaIndietro(serie,i,n){
 
 /* Condizioni necessarie. Restituisce null se e' tutto a posto,
    altrimenti il motivo per cui l'indice va azzerato. */
-function veto(st,i){
+function veto(st,i,sp){
   if(!VETI_ATTIVI) return null;
 
   const ta = mediaIndietro(st.ta,i,VETO_TA_GIORNI);
@@ -682,11 +734,14 @@ function veto(st,i){
     if(ta < VETO_TA_MIN) return 'aria troppo fredda ('+ta.toFixed(1)+' \u00B0C di media)';
     if(ta > VETO_TA_MAX) return 'aria troppo calda ('+ta.toFixed(1)+' \u00B0C di media)';
 
-    /* caldo e secco insieme: e' la combinazione a fermare tutto,
-       il caldo da solo no */
+    /* caldo e secco insieme: e' la combinazione a fermare tutto, il caldo
+       da solo no. La soglia dipende dalla specie: il porcino nero regge
+       parecchi gradi in piu' del chiodino. */
+    const limite = caldoSpecie(sp);
     const pio = mediaIndietro(st.pio,i,VETO_TA_GIORNI);
-    if(ta > VETO_CALDO && pio!==null && pio < VETO_CALDO_MM){
-      return 'caldo senza pioggia ('+ta.toFixed(1)+' \u00B0C, '+pio.toFixed(1)+' mm al giorno)';
+    if(ta > limite && pio!==null && pio < VETO_CALDO_MM){
+      return 'caldo senza pioggia ('+ta.toFixed(1)+' \u00B0C sopra '+limite
+             +', '+pio.toFixed(1)+' mm al giorno)';
     }
   }
 
@@ -714,9 +769,9 @@ function valuta(st,i,sp){
   }
   if(st.sospetta) tot=0;
 
-  /* i veti valgono per tutte le specie: sono condizioni del posto,
-     non preferenze della singola */
-  const bloccato = veto(st,i);
+  /* i primi due veti sono condizioni del posto, uguali per tutti;
+     quello su caldo e siccita' dipende dalla specie */
+  const bloccato = veto(st,i,sp);
   if(bloccato!==null && tot!==null) tot=0;
 
   return {T:T===null?null:Math.round(T), I:I===null?null:Math.round(I),
@@ -1266,7 +1321,8 @@ function colonne(){
   c.push(['tot', (s.sp? s.nome : s.nome+'<br>gruppo').replace(/ /g,'<br>'), 'idxh']);
   SPECIE.forEach(sp=>{ if(!s.sp||sp.id!==s.id)
     c.push(['sp_'+sp.id, sp.nome.replace(/,? /g,'<br>'), 'idxh']); });
-  c.push(['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
+  c.push(['veto','Azzerato da','testoh'],
+         ['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
   [['ts','T suolo<br>7\u201328<br>\u00b0C'],['ts0','T suolo<br>0\u20137<br>\u00b0C'],
    ['sm','Umidit\u00e0<br>7\u201328<br>m\u00b3/m\u00b3'],['sm0','Umidit\u00e0<br>0\u20137<br>m\u00b3/m\u00b3'],
    ['pio','Pioggia<br>del gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
@@ -1283,6 +1339,7 @@ function valori(st){
   const ant=(st.p30[i]!==null&&st.p15[i]!==null)?+(st.p30[i]-st.p15[i]).toFixed(1):null;
   const o={n:st.n,a:st.a,q:st.q,tot:indice(st),
     alberi:attiva.alberi, vers:versante(st,i,attiva).replace(/<[^>]+>/g,''),
+    veto:(va.veto||''),
     ts:st.ts[i],ts0:st.ts0[i],shock:shock,sm:st.sm[i],
     sm0:(st.sm0?st.sm0[i]:null),pio:st.pio[i],
     p7:st.p7[i],p15:st.p15[i],p30:st.p30[i],ant:ant,gi:va.gi,T:va.T,I:va.I,
@@ -1409,7 +1466,7 @@ document.getElementById('xlsx').onclick=()=>{
     ['Giorno',DATE[gIdx]],['Selezione',SEL[selIdx].nome],
     ['Ultimo giorno con pioggia misurata',ULTIMA_PIOGGIA],['Stazioni esportate',m.length-1],[],
     ['Pioggia','SIR Regione Toscana, misurata, prevalidata'],
-    ['Suolo e aria','Open-Meteo (ERA5-Land, ICON), modellati'],
+    ['Suolo e aria','Open-Meteo, endpoint previsioni, modellati'],
     ['Indice','0,45 termico + 0,40 idrico + 0,10 innesco + 0,05 stagionale, con sbarramento termico']];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(meta),'Info');
   XLSX.writeFile(wb,'cercafunghi_'+(VERSIONE||'')+'_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.xlsx');
@@ -1417,9 +1474,10 @@ document.getElementById('xlsx').onclick=()=>{
 
 /* tabella specie nella documentazione */
 document.getElementById('tabspecie').innerHTML='<table><tr><th>Specie</th><th>Finestra T suolo</th>'
- +'<th>Limiti esterni</th><th>Latenza</th><th>Mesi</th><th>Alberatura</th></tr>'
+ +'<th>Limiti esterni</th><th>Veto caldo<br>aria</th><th>Latenza</th><th>Mesi</th><th>Alberatura</th></tr>'
  +SPECIE.map(s=>'<tr><td>'+s.nome+'<br><i style="font-weight:400;font-size:11px">'+s.lat+'</i></td>'
    +'<td>'+s.ts[1]+'\u2013'+s.ts[2]+' \u00b0C</td><td>'+s.ts[0]+' / '+s.ts[3]+' \u00b0C</td>'
+   +'<td>'+(VETI_ATTIVI?('&gt; '+caldoSpecie(s)+' \u00b0C'):'\u2013')+'</td>'
    +'<td>'+s.lag[0]+'\u2013'+s.lag[1]+' gg</td>'
    +'<td>'+s.mesi.map(m=>MESIB[m]).join(' ')+'</td>'
    +'<td style="font-weight:400">'+s.alberi+'</td></tr>').join('')+'</table>';
@@ -1427,9 +1485,11 @@ document.getElementById('tabspecie').innerHTML='<table><tr><th>Specie</th><th>Fi
 document.getElementById('colophon').innerHTML=
  'Pioggia: Servizio Idrologico Regionale, Regione Toscana \u2014 sir.toscana.it \u00b7 dati prevalidati, ultimo giorno misurato '
  +ULTIMA_PIOGGIA.split('-').reverse().join('/')+'.<br>'
- +'Suolo, aria: Open-Meteo (ERA5-Land, ICON) \u2014 open-meteo.com \u00b7 uso non commerciale.<br>'
+ +'Suolo, aria: Open-Meteo, endpoint delle previsioni \u2014 open-meteo.com \u00b7 uso non commerciale. '
+ +'Anche i giorni passati vengono da run precedenti dello stesso modello, non da rianalisi.<br>'
  +'Coordinate stazioni: Open Data Regione Toscana, licenza CC BY-SA.<br>'
- +'Boschi: Inventario Forestale della Toscana 1978 e Uso e Copertura del Suolo 2019, WMS Geoscopio \u2014 Regione Toscana.<br>'
+ +'Boschi: Inventario Forestale della Toscana (volo 1978, rilievi a terra anni \u201990, griglia 400 m) '
+ +'e Uso e Copertura del Suolo 2019, WMS Geoscopio \u2014 Regione Toscana.<br>'
  +'Sfondi: OpenTopoMap (CC-BY-SA), OpenStreetMap contributors (ODbL), Esri World Imagery.<br>'
  +'Periodo coperto: '+DATE[0].split('-').reverse().join('/')+' \u2013 '+DATE[DATE.length-1].split('-').reverse().join('/')
  +' \u00b7 '+ST.length+' stazioni \u00b7 elaborazione sperimentale.'+(AGGIORNATO?'<br>Dati ricostruiti il '+AGGIORNATO.split('-').reverse().join('/')+'.':'')+(VERSIONE?'<br>Versione <b>'+VERSIONE+'</b>'+(RAMO?', ramo '+RAMO:'')+'.':'');
