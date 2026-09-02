@@ -1,5 +1,5 @@
 {
-  "versione": "A2.0",
+  "versione": "A2.1",
   "ramo": "A2",
 
   "dati": {
@@ -27,7 +27,7 @@
     "veti": {
       "attivi": true,
       "aria_min": 5,
-      "aria_max": 21,
+      "aria_max": 99,
       "aria_giorni": 5,
       "caldo_sopra": 17.5,
       "caldo_pioggia_mm": 1,
