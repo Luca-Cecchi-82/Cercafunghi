@@ -1,0 +1,48 @@
+{
+  "versione": "A3.0",
+  "ramo": "A3",
+
+  "dati": {
+    "giorni_indietro": 45,
+    "giorni_avanti": 7,
+    "giorni_pioggia": 80,
+    "copertura_minima_cumulate": 0.8
+  },
+
+  "indice": {
+    "umidita_profonda": { "soglie": [0.15, 0.28, 0.40, 0.50], "coda": 40 },
+    "pioggia_15gg": { "soglie": [40, 110, 250, 400], "coda": 50 },
+    "mix_idrico": { "peso_umidita": 0.60, "peso_pioggia": 0.40 },
+    "gruppo": { "peso_massimo": 0.70, "peso_medio": 0.30 },
+
+    "ondate": {
+      "evento_mm": 20,
+      "evento_giorni": 2,
+      "fusione_giorni": 4,
+      "finestra_giorni": 45,
+      "coda_giorni": 4,
+      "ampiezza_min": 20,
+      "ampiezza_max": 90,
+      "peso_migliore": 0.70,
+      "peso_altre": 0.30
+    },
+
+    "sviluppo": {
+      "caldo_sopra": 19,
+      "caldo_pioggia_mm": 1,
+      "giorni_media": 5,
+      "suolo_secco": 0.08,
+      "perdita_sviluppo": 0.15,
+      "perdita_raccolta": 0.07,
+      "caldo_scarto_specie": {
+        "armillaria": -4,
+        "pinophilus": -1,
+        "edulis": 0,
+        "cantharellus": 1,
+        "aestivalis": 2,
+        "aereus": 5,
+        "caesarea": 7
+      }
+    }
+  }
+}
