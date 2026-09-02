@@ -27,8 +27,18 @@ Se il SIR non risponde, riusa la pioggia gia' presente nel dati.json
 precedente invece di buttare via tutto.
 
 Fonti:
-  SIR - Servizio Idrologico Regionale, Regione Toscana (pioggia misurata)
-  Open-Meteo, modelli ERA5-Land e ICON (suolo e aria, modellati)
+  SIR - Servizio Idrologico Regionale, Regione Toscana (pioggia MISURATA)
+  Open-Meteo, endpoint /v1/forecast (suolo e aria, MODELLATI)
+
+Nota sulla fonte del suolo, da non perdere di vista:
+viene interrogato SOLO l'endpoint delle previsioni. I giorni passati
+arrivano da past_days, cioe' dalle run precedenti dello stesso modello
+di previsione ricucite fra loro, NON dalla rianalisi ERA5-Land.
+Conseguenza pratica: nella serie passata l'umidita' del suolo mostra
+scalini ogni sei ore nei punti di giunzione fra una run e l'altra.
+Non e' meteo, e' il modello che riparte. Per una serie storica continua
+servirebbe l'endpoint /v1/archive, che pero' si ferma a circa cinque
+giorni fa e andrebbe raccordato con la parte recente.
 """
 
 import csv
@@ -229,6 +239,8 @@ def chiedi_meteo(gruppo, etichetta):
             req = urllib.request.Request(url, headers={"User-Agent": "cercafunghi/1.0"})
             with urllib.request.urlopen(req, timeout=TIMEOUT_METEO) as r:
                 risp = json.loads(r.read().decode("utf-8"))
+            if tentativo > 1:
+                log("    %s: RECUPERATO al tentativo %d" % (etichetta, tentativo))
             return [risp] if isinstance(risp, dict) else risp
         except Exception as e:
             ultimo = e
@@ -247,6 +259,7 @@ def scarica_suolo(stazioni):
     gruppi = [stazioni[i:i + STAZIONI_PER_CHIAMATA]
               for i in range(0, len(stazioni), STAZIONI_PER_CHIAMATA)]
     persi = 0
+    gruppi_persi = []
     for n, g in enumerate(gruppi, 1):
         etichetta = "gruppo %d/%d" % (n, len(gruppi))
         try:
@@ -255,6 +268,7 @@ def scarica_suolo(stazioni):
             log("    %s PERSO dopo %d tentativi: %s"
                 % (etichetta, TENTATIVI_METEO, e))
             persi += len(g)
+            gruppi_persi.append((etichetta, [s["c"] for s in g]))
             continue
         for s, d in zip(g, risp):
             orario = d.get("hourly") or {}
@@ -275,7 +289,12 @@ def scarica_suolo(stazioni):
         log("    %s scaricato" % etichetta)
         time.sleep(PAUSA_METEO)
     if persi:
-        log("  ATTENZIONE: %d stazioni senza dati del suolo" % persi)
+        log("  ATTENZIONE: %d stazioni senza dati del suolo, su %d gruppi persi:"
+            % (persi, len(gruppi_persi)))
+        for etichetta, codici in gruppi_persi:
+            log("    %s -> %s" % (etichetta, ", ".join(codici)))
+    else:
+        log("  suolo: tutti i %d gruppi scaricati" % len(gruppi))
     return fuori
 
 
