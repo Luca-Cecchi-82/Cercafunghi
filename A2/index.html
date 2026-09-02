@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cercafunghi Toscana — zone di raccolta da dati meteo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--carta:#E8E1D1;--carta2:#DED5C1;--inchiostro:#221E17;--curva:#A8977A;--accento:#8C2F16;--buono:#3E6B34}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--carta);color:var(--inchiostro);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;line-height:1.5;
+ background-image:repeating-linear-gradient(0deg,transparent 0 39px,rgba(168,151,122,.16) 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,rgba(168,151,122,.16) 39px 40px)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 18px 70px}
+h1,h2,h3{font-family:'Zilla Slab',Georgia,serif;margin:0}
+h1{font-size:clamp(25px,4.2vw,40px);font-weight:700;line-height:1.08;letter-spacing:-.01em}
+h2{font-size:19px;font-weight:600}h3{font-size:16px;font-weight:600}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accento);font-weight:600;margin-bottom:9px}
+.tesi{font-family:'Zilla Slab',serif;font-size:clamp(14px,1.8vw,17px);max-width:74ch;margin:10px 0 0;line-height:1.38}
+hr.rule{border:0;border-top:1.5px solid var(--inchiostro);margin:16px 0 0}
+/* invito a segnalare un'uscita: porta al modulo nella radice del sito */
+.segnala{display:inline-block;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;
+ padding:7px 12px;border:1.5px solid var(--accento);color:var(--accento);text-decoration:none;background:transparent}
+.segnala:hover{background:var(--accento);color:var(--carta)}
+.segnala b{font-weight:600}
+.sez{margin-top:22px}
+.sez-h{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.sez-h .nota{font-size:12px;color:#5E5646}
+
+/* barra comando */
+.comando{border:1.5px solid var(--inchiostro);background:var(--carta2);padding:11px 14px;margin-top:16px}
+.specie{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px solid var(--curva)}
+.sp{font-family:inherit;font-size:11.5px;padding:4px 9px;border:1px solid var(--curva);background:transparent;color:#4A4335;cursor:pointer;text-align:left;line-height:1.25}
+.sp:hover{border-color:var(--inchiostro)}
+.sp[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+.sp small{display:block;font-size:10px;opacity:.72;font-style:italic}
+.datariga{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-top:9px;border-top:1px solid var(--curva)}
+.datariga input[type=range]{flex:1 1 260px;accent-color:var(--accento)}
+.dataval{font-family:'Zilla Slab',serif;font-size:22px;font-weight:600;min-width:170px}
+.badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--curva);color:#5E5646}
+.badge.mis{border-color:var(--buono);color:var(--buono)}
+.badge.mod{border-color:var(--accento);color:var(--accento)}
+.consiglio{margin:4px 0 10px;font-size:12.5px;line-height:1.45}
+.consiglio b{font-family:'Zilla Slab',serif}
+
+/* mappa */
+#map{height:min(70vh,620px);border:1.5px solid var(--inchiostro);background:var(--carta2)}
+.leaflet-container{font-family:'IBM Plex Mono',monospace;background:var(--carta2)}
+.leaflet-popup-content-wrapper{border-radius:0;background:var(--carta);border:1.5px solid var(--inchiostro);box-shadow:3px 3px 0 rgba(34,30,23,.25)}
+.leaflet-popup-tip{background:var(--carta);border:1.5px solid var(--inchiostro)}
+.leaflet-popup-content{margin:11px 13px;font-size:12px;line-height:1.5;max-height:340px;overflow:auto}
+.leaflet-control-layers{border-radius:0!important;border:1.5px solid var(--inchiostro)!important;background:var(--carta)!important;font-size:12px}
+.leaflet-bar a{border-radius:0!important;background:var(--carta);color:var(--inchiostro);border-color:var(--curva)}
+.pp-n{font-family:'Zilla Slab',serif;font-size:17px;font-weight:600;display:block}
+.pp-s{font-size:10.5px;color:#5E5646;display:block;margin-bottom:8px}
+.pp-sec{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accento);font-weight:600;margin:9px 0 3px}
+.pp-r{display:flex;justify-content:space-between;gap:14px;border-top:1px solid rgba(168,151,122,.7);padding:2px 0}
+.pp-r b{font-weight:600;white-space:nowrap}
+.pp-w{color:var(--accento);font-size:10.5px;display:block;margin-top:7px}
+.pp-bar{height:9px;background:rgba(168,151,122,.4);margin-top:3px}
+.pp-bar i{display:block;height:9px}
+
+/* boschi */
+.boschi{border:1.5px solid var(--inchiostro);background:var(--carta2);padding:12px 14px;margin-top:12px}
+.bo-lista{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.bo{display:flex;align-items:center;gap:6px;font-family:inherit;font-size:11.5px;padding:4px 9px;border:1px solid var(--curva);background:transparent;color:#4A4335;cursor:pointer}
+.bo[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+.bo img{height:13px;width:auto;display:block;background:#fff}
+.bo.sugg{border-color:var(--accento);border-width:2px}
+
+/* filtri */
+.filtri{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin:16px 0 6px}
+.fgrp{display:flex;flex-direction:column;gap:6px}
+.flab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5E5646;font-weight:600}
+.chips{display:flex;gap:5px;flex-wrap:wrap;max-width:780px}
+.chip{font-family:inherit;font-size:11px;padding:4px 9px;border:1px solid var(--curva);background:transparent;color:#4A4335;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+.mini{font-family:inherit;font-size:10.5px;padding:3px 7px;border:1px solid var(--curva);background:transparent;cursor:pointer;color:#4A4335}
+input[type=range]{accent-color:var(--accento)}
+input[type=search]{font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--curva);background:var(--carta2);color:var(--inchiostro);width:165px}
+input:focus-visible,button:focus-visible,th:focus-visible{outline:2px solid var(--accento);outline-offset:2px}
+.conteggio{font-size:12px;color:#5E5646}
+.legenda{display:flex;gap:15px;flex-wrap:wrap;font-size:11px;margin-top:11px;align-items:center}
+.lg{display:flex;align-items:center;gap:6px}
+.sw{width:13px;height:13px;border-radius:50%;border:1px solid rgba(34,30,23,.6);display:inline-block}
+.sw.tr{background:transparent;border:1.6px dashed var(--accento)}
+
+/* grafici */
+.plot-box{background:var(--carta2);border:1.5px solid var(--inchiostro);padding:13px 13px 5px}
+svg.g{display:block;width:100%;height:auto;overflow:visible}
+.gridline{stroke:var(--curva);stroke-width:.7}.axis{stroke:var(--inchiostro);stroke-width:1.4}
+.axlab{font-size:10px;fill:#5E5646}
+.axtitle{font-size:11px;fill:var(--inchiostro);font-weight:600;letter-spacing:.06em}
+.band{fill:rgba(62,107,52,.14);stroke:var(--buono);stroke-width:1.2;stroke-dasharray:5 3}
+.bandlab{font-size:10px;fill:var(--buono);font-weight:600;letter-spacing:.09em;text-transform:uppercase}
+.pt{cursor:pointer;stroke:rgba(34,30,23,.6);stroke-width:.9}.pt:hover{stroke-width:2.4}
+.ptlab{font-size:9.5px;fill:var(--inchiostro);pointer-events:none;font-weight:500}
+
+/* tabella */
+.tab-scroll{overflow:auto;border:1.5px solid var(--inchiostro);background:var(--carta2);max-height:540px}
+table{border-collapse:collapse;width:100%;font-size:12px;min-width:1080px}
+th{background:var(--inchiostro);color:var(--carta);font-weight:500;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:7px 8px;text-align:right;cursor:pointer;white-space:nowrap;position:sticky;top:0;z-index:2}
+th:first-child,th:nth-child(2){text-align:left}
+th .ar{opacity:.35;margin-left:3px}th.on .ar{opacity:1;color:#E3B23C}
+td{padding:5px 8px;text-align:right;border-top:1px solid rgba(168,151,122,.55);white-space:nowrap}
+td:first-child,td:nth-child(2){text-align:left}
+tbody tr:hover{background:rgba(140,47,22,.09);cursor:pointer}
+tbody tr.sel{background:rgba(140,47,22,.18)}
+.nome{font-weight:600}.area-t{font-size:10px;color:#5E5646}
+.idx{display:inline-block;min-width:28px;text-align:center;padding:1px 5px;font-weight:600;color:#F3EEE2}
+.flagsp,.flagap{color:var(--accento);font-weight:700;cursor:help}
+
+/* documentazione */
+.doc{margin-top:34px;border-top:1.5px solid var(--inchiostro);padding-top:20px}
+.doc h2{margin-bottom:6px}
+.doc h3{margin:20px 0 6px;color:var(--accento)}
+.doc p,.doc li{font-size:12.5px;line-height:1.68;max-width:82ch}
+.doc code{background:rgba(168,151,122,.32);padding:1px 5px;font-size:11.5px}
+.doc pre{background:var(--carta2);border-left:3px solid var(--accento);padding:10px 13px;overflow-x:auto;font-size:11.5px;line-height:1.5}
+.doc table{min-width:0;width:100%;font-size:12px;margin:10px 0;background:var(--carta2);border:1px solid var(--curva)}
+.doc th{position:static;font-size:10px}
+.doc td{text-align:left}
+.doc td:first-child{font-weight:600}
+details{border:1px solid var(--curva);background:var(--carta2);padding:9px 13px;margin:9px 0}
+summary{cursor:pointer;font-family:'Zilla Slab',serif;font-size:15px;font-weight:600}
+.colophon{margin-top:26px;border-top:1px solid var(--curva);padding-top:13px;font-size:11px;color:#5E5646;line-height:1.7}
+.avviso{border:2px solid var(--accento);padding:11px 14px;margin-top:16px;font-size:12.5px;line-height:1.6}
+
+.freccia{font-family:inherit;font-size:15px;padding:5px 13px;border:1.5px solid var(--inchiostro);background:var(--carta);color:var(--inchiostro);cursor:pointer;line-height:1}
+.freccia:hover{background:var(--inchiostro);color:var(--carta)}
+.freccia:disabled{opacity:.3;cursor:default}
+.datacentro{min-width:180px;text-align:center}
+.datadow{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#5E5646}
+.asterisco{font-size:11.5px;color:var(--accento);margin-top:6px;line-height:1.45}
+.chiudi{float:right;background:none;border:1px solid var(--curva);font-family:inherit;font-size:11px;padding:3px 8px;cursor:pointer;color:#4A4335}
+.sc-fondo{fill:transparent;cursor:grab}
+.sc-fondo.trascino{cursor:grabbing}
+.cerca-box{border:1px solid var(--curva);background:rgba(232,225,209,.6);padding:7px 9px;margin:7px 0}
+.cerca-box b{font-family:'Zilla Slab',serif}
+.vers{font-size:11.5px;line-height:1.45;margin-top:3px}
+.altre{margin-top:4px}
+.altre div{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:1px 0}
+
+/* pastiglie boschi piene */
+.bo{display:inline-block;font-size:11px;padding:4px 8px;border:1.5px solid rgba(34,30,23,.4);
+    line-height:1.2;letter-spacing:.01em}
+.bo b{font-weight:600;opacity:.75;margin-right:3px}
+.bo.sugg{border-color:var(--accento);border-width:2.5px;box-shadow:0 0 0 1px rgba(140,47,22,.25)}
+.bof{display:inline-block;font-family:inherit;font-size:11px;padding:4px 8px;
+    border:1.5px solid rgba(34,30,23,.4);cursor:pointer;line-height:1.2;letter-spacing:.01em}
+.bof[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.8)}
+.bof.spenta{opacity:.4;filter:grayscale(.6)}
+.bof.sugg{border-color:var(--accento);border-width:2.5px}
+.bof b{font-weight:700;opacity:.85;margin-right:4px;font-variant-numeric:tabular-nums}
+.boschi+.boschi{margin-top:10px}
+.ver{font-family:'Zilla Slab',serif;font-size:15px;font-weight:600;color:var(--accento);margin-top:8px;letter-spacing:.02em}
+.filtri-mappa{border:1.5px solid var(--inchiostro);background:var(--carta2);padding:11px 14px;margin-top:12px}
+.filtri-mappa .filtri{margin:0}
+.filtri-mappa .conteggio{margin-top:9px;padding-top:8px;border-top:1px solid var(--curva)}
+.voci{margin-top:12px;border:1px solid var(--curva);background:var(--carta2);padding:9px 13px}
+.voci summary{font-family:'Zilla Slab',serif;font-size:14px;font-weight:600;cursor:pointer}
+.voci-t{width:100%;min-width:0;font-size:11.5px;margin-top:9px;border-collapse:collapse}
+.voci-t td{text-align:left;white-space:normal;padding:4px 8px 4px 0;vertical-align:top;line-height:1.45;border-top:1px solid rgba(168,151,122,.5)}
+.voci-t td:first-child{font-weight:600;width:150px;white-space:nowrap}
+.caricamento{border:1.5px solid var(--inchiostro);background:var(--carta2);padding:14px 16px;margin-top:16px;font-family:'Zilla Slab',serif;font-size:15px;line-height:1.5}
+.bo-riga{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.bo-riga input{width:150px;accent-color:var(--accento)}
+.mini.att[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+
+/* finestra info sul grafico, stessa veste del popup della mappa */
+.plot-box{position:relative}
+#scpop{position:absolute;z-index:20;width:330px;max-height:400px;overflow:auto;
+  background:var(--carta);border:1.5px solid var(--inchiostro);box-shadow:3px 3px 0 rgba(34,30,23,.28);
+  padding:11px 13px;font-size:12px;line-height:1.5;display:none}
+#scpop.on{display:block}
+#scpop .x{position:sticky;top:-11px;float:right;background:var(--carta);border:1px solid var(--curva);
+  font-family:inherit;font-size:11px;padding:1px 7px;cursor:pointer;color:#4A4335;margin:-4px -4px 0 0}
+
+/* tabella compatta */
+table{table-layout:auto}
+th{padding:5px 5px;white-space:normal;line-height:1.15;vertical-align:bottom}
+td{padding:4px 5px}
+th.num,td.num{text-align:right}
+th.idxh{width:44px;max-width:44px;font-size:9px}
+th.num{min-width:52px}
+td.idxc{width:44px;text-align:center;padding:4px 3px}
+.idx{min-width:26px;padding:1px 4px;font-size:11.5px}
+td.testo{text-align:left;white-space:normal;font-size:10.5px;line-height:1.35;min-width:170px;max-width:270px}
+th.testoh{min-width:170px}
+td.nome,th.nomeh{max-width:150px;white-space:normal}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:640px){.wrap{padding:18px 12px 55px}.ptlab{display:none}#map{height:62vh}.dataval{font-size:18px;min-width:130px}}
+</style></head><body>
+<div class="wrap">
+
+<div class="eyebrow">Toscana &middot; 376 stazioni &middot; dati SIR Regione Toscana + Open-Meteo</div>
+<h1>Cercafunghi</h1>
+<p class="tesi">Individua le zone in cui, in un dato giorno, le condizioni di <b>pioggia, temperatura e umidit&agrave; del suolo</b> sono compatibili con la fruttificazione. Non dice dove ci sono i funghi: dice dove il bosco giusto avrebbe le condizioni giuste.</p>
+<div class="ver" id="versione"></div>
+<a class="segnala" href="../segnala.html?da=A2"><b>Sei stato a funghi?</b> Registra l'uscita &mdash; anche se non hai trovato niente</a>
+<hr class="rule">
+
+<div id="caricamento" class="caricamento">Carico i dati delle stazioni…</div>
+
+<div class="comando">
+  <div class="flab">Cosa stai cercando</div>
+  <div class="consiglio" id="consiglio"></div>
+
+  <div class="datariga">
+    <button class="freccia" id="prev" title="giorno precedente">&#9664;</button>
+    <div class="datacentro">
+      <span class="dataval" id="giornoval"></span>
+      <span class="datadow" id="giornodow"></span>
+    </div>
+    <button class="freccia" id="next" title="giorno successivo">&#9654;</button>
+    <span class="badge" id="fonte"></span>
+    <button class="mini" id="oggi">ultimo giorno con pioggia</button>
+    <button class="mini" id="fine">ultima previsione</button>
+  </div>
+  <div class="asterisco" id="asterisco"></div>
+
+  <div class="specie" id="specie"></div>
+</div>
+
+<div class="sez">
+  <div class="sez-h"><h2>Carta</h2><span class="nota">Diametro e colore secondo l&rsquo;indice. Clicca un cerchio per la scheda completa della stazione.</span></div>
+  <div id="map"></div>
+  <div class="legenda" id="leg"></div>
+
+  <div class="filtri-mappa">
+    <div class="filtri">
+      <div class="fgrp" style="flex:1 1 470px">
+        <span class="flab">Area <button class="mini" id="tutteAree">tutte</button> <button class="mini" id="nessunaArea">nessuna</button></span>
+        <div class="chips" id="chipArea"></div>
+      </div>
+      <div class="fgrp"><span class="flab">Quota minima <span id="qv">0</span> m</span><input type="range" id="q" min="0" max="1600" step="50" value="0" style="width:150px"></div>
+      <div class="fgrp"><span class="flab">Cerca stazione</span><input type="search" id="cerca" placeholder="Orecchiella&hellip;"></div>
+    </div>
+    <div class="conteggio" id="cnt"></div>
+  </div>
+
+  <div class="boschi">
+    <h3>Inventario Forestale della Toscana &mdash; 1978</h3>
+    <div class="nota" style="font-size:11.5px;color:#5E5646">Griglia a 400 m, datata e grossolana nel disegno, ma <b>distingue la specie arborea</b>: faggete, castagneti, cerrete, pinete. Accendine uno o pi&ugrave;. Bordo rosso sui boschi adatti alla specie selezionata. Sulla mappa ogni cella &egrave; marcata col suo <b>codice</b>, quello scritto in grassetto sui pulsanti.</div>
+    <div class="bo-riga">
+      <span class="flab">Trasparenza</span><input type="range" id="opac-ift" min="20" max="100" value="80">
+      <button class="mini" id="ift-spegni">spegni tutti</button>
+    </div>
+    <div class="bo-lista" id="boschi-ift"></div>
+  </div>
+
+  <div class="boschi">
+    <h3>Uso e copertura del suolo &mdash; 2019</h3>
+    <div class="nota" style="font-size:11.5px;color:#5E5646">Poligoni 1:10.000, aggiornati e ben disegnati, ma si fermano a latifoglie / conifere / misti. I riquadri sono la <b>legenda dei colori</b>: bordo rosso sugli ambienti adatti alla specie selezionata.</div>
+    <div class="bo-riga">
+      <button class="mini att" id="ucs-toggle" aria-pressed="false">Uso del suolo 2019: spento</button>
+      <span class="flab">Trasparenza</span><input type="range" id="opac" min="20" max="100" value="75">
+    </div>
+    <div class="bo-lista" id="boschi"></div>
+    <div class="nota" style="margin-top:8px;font-size:11px">Sono riportate le classi utili alla ricerca. <a id="legenda-ufficiale" href="#" target="_blank" rel="noopener">Legenda completa del servizio</a> per tutte le altre.</div>
+    <div id="bosco-info" class="nota" style="margin-top:6px;font-size:11.5px"></div>
+  </div>
+</div>
+
+<div class="sez">
+  <div class="sez-h"><h2>Temperatura contro umidit&agrave; del suolo</h2>
+    <span class="nota">Il riquadro verde &egrave; la finestra favorevole. Rotella per ingrandire, trascina per spostarti, clicca un punto per la scheda.</span>
+    <button class="mini" id="reset">reimposta vista</button></div>
+  <div class="plot-box" id="plotbox"><svg id="sc" class="g" viewBox="0 0 900 470" role="img" aria-label="Dispersione temperatura contro umidita del suolo"></svg></div>
+</div>
+
+<div class="sez">
+  <div class="sez-h"><h2>Tutte le stazioni</h2><span class="nota">Clicca un&rsquo;intestazione per riordinare, una riga per aprire la scheda. Valori del giorno selezionato.</span></div>
+  <div class="tab-scroll"><table><thead><tr id="thr"></tr></thead><tbody id="tb"></tbody></table></div>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="mini" id="xlsx">scarica in Excel</button>
+    <button class="mini" id="csv">scarica in CSV</button>
+  </div>
+
+  <details class="voci">
+    <summary>Che cosa sono le colonne</summary>
+    <table class="voci-t">
+      <tr><td>Dove cercare</td><td>Gli alberi con cui la specie forma micorriza, o su cui cresce. La colonna segue la specie che regge l&rsquo;indice, non necessariamente quella selezionata.</td></tr>
+      <tr><td>Azzerato da</td><td>Se la casella &egrave; piena, l&rsquo;indice di quella stazione &egrave; stato portato a zero da una <b>condizione necessaria</b> non rispettata, e il testo dice quale. Vuota significa che nessun veto &egrave; scattato. Vedi il punto 4.</td></tr>
+      <tr><td>Versante consigliato</td><td>Da che parte spostarsi, ricavato confrontando la temperatura del suolo del giorno con la finestra della specie. Se il suolo &egrave; troppo caldo manda a nord, se &egrave; troppo freddo a sud.</td></tr>
+      <tr><td>T suolo 7&ndash;28</td><td>Temperatura media del giorno alla profondit&agrave; dove sta il micelio. &Egrave; la grandezza pi&ugrave; importante di tutte. Modellata.</td></tr>
+      <tr><td>T suolo 0&ndash;7</td><td>Temperatura dello strato superficiale. Reagisce in poche ore, mentre il profondo impiega giorni.</td></tr>
+      <tr><td>Umidit&agrave; 7&ndash;28</td><td>Acqua contenuta nel suolo profondo, in metri cubi d&rsquo;acqua per metro cubo di terra. Sotto 0,10 &egrave; secco, sopra 0,40 &egrave; saturo.</td></tr>
+      <tr><td>Umidit&agrave; 0&ndash;7</td><td>Acqua nella lettiera. In questa versione <b>non entra nell&rsquo;indice</b>: resta in tabella perch&eacute; utile da guardare. Il motivo &egrave; spiegato al punto 3.</td></tr>
+      <tr><td>Pioggia del gg</td><td>Millimetri caduti nel giorno selezionato. Misurata dal pluviometro.</td></tr>
+      <tr><td>P7, P15, P30</td><td>Somma della pioggia dei 7, 15 e 30 giorni fino al giorno selezionato, incluso.</td></tr>
+      <tr><td>Antec.</td><td>P30 meno P15: quanta acqua c&rsquo;era gi&agrave; nel terreno <i>prima</i> dei quindici giorni recenti. Un valore vicino a zero significa suolo che partiva cotto.</td></tr>
+      <tr><td>Shock</td><td>Di quanti gradi &egrave; scesa la temperatura del suolo negli ultimi cinque giorni. Il calo brusco &egrave; il segnale che innesca la buttata; il segno meno indica che si sta raffreddando.</td></tr>
+      <tr><td>Innesco</td><td>Quanti giorni sono passati dall&rsquo;ultima pioggia significativa, cio&egrave; almeno 20 mm in due giorni. Ogni specie ha la sua latenza: prima o dopo quella finestra il punteggio cala.</td></tr>
+      <tr><td>Punteggio termico</td><td>Da 0 a 100, quanto la temperatura del suolo cade dentro la finestra della specie. Pesa 0,45 nell&rsquo;indice e sotto 25 fa scattare lo sbarramento.</td></tr>
+      <tr><td>Punteggio idrico</td><td>Da 0 a 100, combinazione di umidit&agrave; del suolo e pioggia dei 15 giorni. Pesa 0,40.</td></tr>
+      <tr><td>T aria</td><td>Media, minima e massima dell&rsquo;aria a 2 metri. Non entrano nell&rsquo;indice: servono per farsi un&rsquo;idea della giornata.</td></tr>
+    </table>
+    <p style="font-size:11.5px;color:#5E5646;margin:8px 0 0">Il calcolo completo, con tutte le soglie, &egrave; nella sezione qui sotto.</p>
+  </details>
+</div>
+<div class="doc">
+<h2>Come sono fatte le valutazioni</h2>
+<p>Questa sezione serve a rendere l&rsquo;indice <b>ricostruibile e discutibile</b>. Ogni soglia &egrave; scritta esplicitamente: chi non &egrave; d&rsquo;accordo pu&ograve; cambiarla, e un micologo pu&ograve; contestarla con cognizione di causa. Tutti i parametri stanno in un unico blocco all&rsquo;inizio del codice della pagina, sotto la scritta <code>PARAMETRI</code>.</p>
+
+<div class="avviso"><b>Che cosa non fa questa app.</b> Non sa dove sono i funghi e non sa che alberi ci sono nel punto esatto. Valuta solo se il <i>clima recente</i> in prossimit&agrave; di una stazione di misura &egrave; compatibile con la fruttificazione di una specie. Il bosco giusto lo devi trovare tu, con la carta forestale e con l&rsquo;occhio. Un indice alto in un oliveto non vuol dire niente.</div>
+
+<h3>1. Da dove vengono i dati</h3>
+<table>
+<tr><th>Dato</th><th>Fonte</th><th>Natura</th><th>Nota</th></tr>
+<tr><td>Pioggia giornaliera</td><td>SIR &mdash; Servizio Idrologico Regionale, Regione Toscana</td><td>Misurata</td><td>Pluviometro a bascula. Aggregazione 0&ndash;24. Serve perch&eacute; i temporali estivi sono troppo piccoli perch&eacute; un modello li veda</td></tr>
+<tr><td>Temperatura suolo 7&ndash;28 cm</td><td>Open-Meteo, endpoint previsioni</td><td>Modellata</td><td>Nessuna rete pubblica italiana la misura in bosco. Anche i giorni passati vengono da run precedenti dello stesso modello, non da rianalisi</td></tr>
+<tr><td>Temperatura suolo 0&ndash;7 cm</td><td>Open-Meteo</td><td>Modellata</td><td>Strato superficiale, reagisce in ore anzich&eacute; in giorni</td></tr>
+<tr><td>Umidit&agrave; suolo 7&ndash;28 cm</td><td>Open-Meteo</td><td>Modellata</td><td>Contenuto volumetrico d&rsquo;acqua, m&sup3;/m&sup3;</td></tr>
+<tr><td>Umidit&agrave; suolo 0&ndash;7 cm</td><td>Open-Meteo</td><td>Modellata</td><td>La lettiera. Serve come freno: se &egrave; secca il carpoforo non riesce a spuntare</td></tr>
+<tr><td>Temperatura aria 2 m</td><td>Open-Meteo</td><td>Modellata</td><td>Media, minima e massima giornaliere</td></tr>
+<tr><td>Coordinate stazioni</td><td>Open Data Regione Toscana, GeoJSON SIR</td><td>Misurata</td><td>19 stazioni della rete TOS09 mancano dal file e sono geocodificate sul centro abitato: marcate <span class="flagap">&asymp;</span></td></tr>
+<tr><td>Boschi per specie arborea</td><td>Inventario Forestale della Toscana, WMS Geoscopio</td><td>Fotointerpretazione 1978 + rilievi anni &rsquo;90</td><td>Griglia 400 m. Distingue faggete, castagneti, cerrete, pinete. Solo visualizzazione</td></tr>
+<tr><td>Uso e copertura del suolo</td><td>UCS 2019, WMS Geoscopio</td><td>Fotointerpretazione 2019</td><td>Poligoni 1:10.000, Corine Land Cover: si ferma a latifoglie / conifere / misti. Solo visualizzazione</td></tr>
+</table>
+<p><b>Finestra di aggregazione.</b> Le cumulate SIR con sensore <code>pluvio0_24</code> vanno da mezzanotte a mezzanotte. I dati del 2026 sono <b>prevalidati</b> (flag <code>P</code>), non verificati: possono cambiare dopo la validazione. I valori mancanti (flag <code>@</code>) sono stati esclusi, non messi a zero.</p>
+
+<h3>2. Le grandezze derivate</h3>
+<pre>P7   = somma della pioggia dei 7 giorni fino al giorno scelto, incluso
+P15  = somma della pioggia dei 15 giorni fino al giorno scelto
+P30  = somma della pioggia dei 30 giorni fino al giorno scelto
+ANT  = P30 - P15   antecedente: quanta acqua c'era gia' prima
+Ts   = temperatura media giornaliera del suolo a 7-28 cm
+Ts0  = temperatura media giornaliera del suolo a 0-7 cm
+SM   = umidita' volumetrica del suolo a 7-28 cm  (m3/m3)
+SM0  = umidita' volumetrica del suolo a 0-7 cm, la lettiera
+SHOCK = Ts(giorno-5) - Ts(giorno)   caduta termica su 5 giorni.
+        Positivo = il suolo si sta raffreddando. E' il segnale che
+        innesca la buttata, piu' della temperatura assoluta.
+INNESCO = giorni trascorsi dall'ultimo evento di pioggia significativo,
+          dove "significativo" = almeno 20 mm cumulati in 2 giorni,
+          cercato nei 30 giorni precedenti. Il micelio non fruttifica
+          subito: ogni specie ha la sua latenza.</pre>
+
+<h3>3. I quattro punteggi parziali</h3>
+<p>Ogni punteggio va da 0 a 100. Le funzioni sono trapezoidali: zero fuori dai limiti esterni, cento fra i limiti interni, rampa lineare in mezzo.</p>
+
+<p><b>Termico (T)</b> &mdash; costruito su <code>Ts</code>, la temperatura a 7&ndash;28 cm, perch&eacute; &egrave; lo strato dove sta il micelio e ha l&rsquo;inerzia giusta. Ogni specie ha quattro soglie <code>[a, b, c, d]</code>: 0 sotto <code>a</code>, rampa fino a 100 in <code>b</code>, 100 fino a <code>c</code>, rampa fino a 0 in <code>d</code>.</p>
+
+<p><b>Idrico (I)</b> &mdash; combinazione di due misure della stessa cosa, una modellata e una misurata:</p>
+<pre>I = 0,60 x punteggio(SM)  +  0,40 x punteggio(P15)
+
+punteggio(SM):   0 sotto 0,15 - 100 fra 0,28 e 0,40 - cala a 40 a 0,50
+punteggio(P15):  0 sotto 40 mm - 100 fra 110 e 250 mm - cala a 50 a 400 mm</pre>
+<p>Le soglie sono state alzate rispetto alla versione precedente, dove il punteggio pieno arrivava gi&agrave; a 0,20 di umidit&agrave; e a 60&nbsp;mm di pioggia in quindici giorni. Erano valori troppo generosi: 0,20 &egrave; un terreno appena umido, ben sotto la capacit&agrave; di campo di un suolo forestale, e sessanta millimetri in quindici giorni a fine estate evaporano quasi per intero.</p>
+<p><b>Il freno sulla lettiera non c&rsquo;&egrave; pi&ugrave;.</b> Nella versione precedente, con umidit&agrave; superficiale sotto 0,08, il punteggio idrico veniva ridotto di un quarto. Il ragionamento era buono &mdash; il micelio vive in profondit&agrave; ma il carpoforo per uscire deve attraversare i primi centimetri &mdash; ma misurato sui dati reali non reggeva.</p>
+<p>Su 19.552 valori delle 376 stazioni, la situazione che quel freno voleva cogliere, cio&egrave; <i>superficie secca con profondit&agrave; umida</i>, si verifica <b>14 volte, lo 0,1% dei casi</b>. La correlazione fra i due strati &egrave; 0,73: quando la superficie &egrave; secca lo &egrave; anche il profondo, e il punteggio idrico sta gi&agrave; scendendo per conto suo. Il freno contava due volte lo stesso fatto.</p>
+<p>In pi&ugrave;, quasi un valore su cinque cade entro 0,02 dalla soglia, mentre lo strato superficiale varia fino a 0,04 da un giorno all&rsquo;altro: in quella fascia lo scatto era deciso dal rumore del modello, non dal terreno. Il fenomeno biologico resta reale; il dato di cui disponiamo non lo distingue.</p>
+<p>La penalizzazione oltre i 200&nbsp;mm non &egrave; un vezzo: su suolo cotto dall&rsquo;estate una pioggia estrema ruscella invece di infiltrare, e nei compluvi satura fino all&rsquo;asfissia. L&rsquo;asse Bagnone&ndash;Iera con 400&nbsp;mm in agosto 2026 &egrave; il caso da manuale.</p>
+
+<p><b>Innesco (N)</b> &mdash; il tempo trascorso dall&rsquo;ultima pioggia significativa deve cadere nella finestra di latenza della specie. Il micelio non fruttifica subito: gli servono giorni.</p>
+<pre>100 se INNESCO e' dentro la finestra [min, max] della specie
+cala linearmente fino a 0 a meta' finestra di distanza
+0 se non c'e' stato nessun evento nei 30 giorni</pre>
+
+<p><b>Stagionale (S)</b> &mdash; 100 se il mese rientra nella stagione tipica della specie, 25 altrimenti. &Egrave; un correttivo debole apposta: le stagioni si stanno spostando e non voglio che il calendario schiacci i dati.</p>
+
+<h3>4. Come si compone l&rsquo;indice</h3>
+<pre>INDICE = veti x ( 0,45 x T + 0,40 x I + 0,10 x N + 0,05 x S )
+
+dove veti vale 0 oppure 1
+
+poi sbarramento termico:
+  se T &lt; 25  allora  INDICE = min(INDICE, 35)</pre>
+
+<p><b>Le condizioni necessarie.</b> &Egrave; la differenza principale rispetto al ramo A1, dove l&rsquo;indice era una semplice somma pesata. In una somma i termini si compensano: con temperatura perfetta e terreno arido da un mese, il solo punteggio termico portava a casa quarantacinque punti su cento, e quarantacinque sembrano condizioni discrete mentre la realt&agrave; &egrave; zero.</p>
+<p>Alcune condizioni non si compensano: se mancano, non escono funghi, punto. Qui sono tre.</p>
+<table>
+<tr><th>Condizione</th><th>Soglia</th><th>Da dove viene</th></tr>
+<tr><td>Aria troppo fredda o troppo calda</td><td>media di 5 giorni fuori dall&rsquo;intervallo impostato</td><td>osservazione, con limiti allargati</td></tr>
+<tr><td>Caldo senza pioggia</td><td>sopra la soglia della specie con meno di 1&nbsp;mm al giorno di media su 5 giorni</td><td>osservazione per <i>Boletus edulis</i>, estrapolata alle altre specie</td></tr>
+<tr><td>Siccit&agrave; prolungata</td><td>meno di 15&nbsp;mm in 30 giorni</td><td><b>stima</b>, non letteratura</td></tr>
+</table>
+<p>Le prime due vengono da uno studio decennale su 1905 carpofori di <i>Boletus edulis</i> censiti in faggete della Germania nord-occidentale fra il 2015 e il 2024. La fruttificazione &egrave; stata osservata fra 7 e 19&nbsp;&deg;C di temperatura dell&rsquo;aria mediata su cinque giorni, con ottimo attorno a 13,2, e <b>nessun carpoforo sopra 17,5&nbsp;&deg;C quando la pioggia media giornaliera stava sotto 1&nbsp;mm</b>. Sotto quella soglia termica, invece, i funghi uscivano regolarmente anche senza pioggia recente: non &egrave; il caldo a fermare tutto, &egrave; la combinazione con la siccit&agrave;.</p>
+<p>Le soglie qui usate sono <b>volutamente pi&ugrave; larghe del dato osservato</b>. Il valore per <i>edulis</i> &egrave; portato a 19&nbsp;&deg;C invece di 17,5, per due motivi: il dato viene da faggete del nord Europa, e soprattutto il modello non conosce ancora pendenza, esposizione e capacit&agrave; di ritenzione del terreno, cio&egrave; proprio i fattori che spostano il bilancio idrico locale. Finch&eacute; quelle variabili mancano, &egrave; giusto sbagliare per eccesso di prudenza.</p>
+<p>Un veto sbagliato &egrave; pi&ugrave; pericoloso di un peso sbagliato. Un peso sbagliato altera l&rsquo;ordine e prima o poi si nota; un veto sbagliato azzera una zona, non ci vai, e <b>non scopri mai di esserti perso una fruttata</b>. L&rsquo;errore diventa invisibile e si conferma da solo. Per questo tutte le soglie stanno nel file di configurazione e si possono spegnere in blocco.</p>
+<p>Un veto non scatta mai per dati mancanti, solo per dati che dicono di no. Quando un punteggio &egrave; azzerato, la scheda della stazione e la colonna <i>Azzerato da</i> ne indicano il motivo.</p>
+
+<p><b>La soglia del caldo cambia da specie a specie.</b> Un solo valore nel file di configurazione fissa il riferimento di <i>Boletus edulis</i>; le altre specie si spostano da l&igrave; con scarti fissi, ricavati dalla distanza fra la fine del loro ottimo termico e quella di <i>edulis</i>. Alzando o abbassando il valore di riferimento si sposta tutta la scala mantenendo le distanze.</p>
+<table>
+<tr><th>Specie</th><th>Scarto</th><th>Con riferimento a 19&nbsp;&deg;C</th></tr>
+<tr><td>Chiodino</td><td>&minus;4</td><td>15&nbsp;&deg;C</td></tr>
+<tr><td>Porcino dei pini</td><td>&minus;1</td><td>18&nbsp;&deg;C</td></tr>
+<tr><td><b>Porcino</b></td><td><b>0</b></td><td><b>19&nbsp;&deg;C</b></td></tr>
+<tr><td>Finferlo</td><td>+1</td><td>20&nbsp;&deg;C</td></tr>
+<tr><td>Porcino estatino</td><td>+2</td><td>21&nbsp;&deg;C</td></tr>
+<tr><td>Porcino nero</td><td>+5</td><td>24&nbsp;&deg;C</td></tr>
+<tr><td>Ovolo buono</td><td>+7</td><td>26&nbsp;&deg;C</td></tr>
+</table>
+<p>Solo la riga del porcino poggia su un&rsquo;osservazione. Le altre sono <b>estrapolazioni</b>: le finestre termiche delle altre specie sono a loro volta stime non calibrate, e la relazione fra temperatura dell&rsquo;aria e del suolo non &egrave; identica in faggeta e in lecceta. Il caso pi&ugrave; forzato &egrave; il chiodino, che &egrave; saprotrofo e non micorrizico: la logica del bilancio idrico vale comunque, ma per una via diversa. Per l&rsquo;ovolo la soglia di 26&nbsp;&deg;C viene raggiunta di rado dalla media su cinque giorni, quindi per lui il veto &egrave; pi&ugrave; formale che operativo.</p>
+<p>I pesi di innesco e stagione sono bassi apposta: in un dato giorno e su una regione piccola come la Toscana quei due punteggi sono quasi uguali per tutte le stazioni, quindi non distinguono niente. La capacità di discriminare sta tutta in <b>T</b> e <b>I</b>, che variano davvero da stazione a stazione.</p>
+<p>Lo sbarramento sul punteggio termico resta dalla versione precedente e agisce sul suolo: se il suolo &egrave; a 26&nbsp;&deg;C non escono porcini per quanta acqua sia caduta. &Egrave; un limite pi&ugrave; morbido dei veti &mdash; non azzera, tiene sotto 35 &mdash; e continua a servire per i casi che i veti non intercettano, perch&eacute; quelli lavorano sull&rsquo;aria e questo sul suolo.</p>
+<p>Le stazioni con serie pluviometrica sospetta &mdash; molti giorni asciutti e cumulata quasi nulla mentre le vicine sono in doppia cifra &mdash; sono marcate <span class="flagsp">!</span> e portate a indice 0. Il confronto è con la mediana delle <b>cinque stazioni più vicine</b>: se qui la cumulata a 15 giorni è sotto 4 mm mentre intorno supera 45 mm, il pluviometro è quasi certamente fuori servizio.</p>
+
+<h3>5. Le due selezioni generiche</h3>
+<p>Oltre alle singole specie ci sono due voci d&rsquo;insieme, <b>Porcini</b> e <b>Altri funghi</b>. Non sono una media semplice:</p>
+<pre>INDICE DI GRUPPO = 0,70 x (indice della specie migliore)
+                 + 0,30 x (media degli indici del gruppo)</pre>
+<p>La componente sul massimo serve perch&eacute; per andare a funghi basta che <i>una</i> specie sia in condizione. La componente sulla media premia i posti dove pi&ugrave; specie sono in condizione insieme, che sono quelli dove conviene spendere una giornata. Nella scheda di ogni stazione trovi comunque il valore separato di tutte e sette le specie, in modo da vedere qual &egrave; quella che tira su l&rsquo;indice.</p>
+
+<h3>6. Il consiglio sul versante</h3>
+<p>&Egrave; calcolato, non generico: confronta la temperatura del suolo del giorno con la finestra della specie e dice da che parte spostarsi.</p>
+<table>
+<tr><th>Situazione</th><th>Consiglio</th></tr>
+<tr><td>Suolo sopra il limite caldo</td><td>Solo versanti nord e nord-est, compluvi, chioma fitta</td></tr>
+<tr><td>Nella met&agrave; calda della finestra</td><td>Nord, nord-est ed est; evitare i crinali a sud</td></tr>
+<tr><td>Nella met&agrave; fresca della finestra</td><td>Tutte le esposizioni</td></tr>
+<tr><td>Sotto il limite freddo</td><td>Versanti sud e sud-ovest, radure e margini soleggiati</td></tr>
+</table>
+<p>Si aggiunge un correttivo sull&rsquo;acqua: con umidit&agrave; sotto 0,15 conviene stare vicino a impluvi e fossi; sopra 0,38 conviene salire sulle mezze coste, perch&eacute; nei fondi il suolo &egrave; saturo. Un versante nord pu&ograve; valere <b>3&ndash;4&nbsp;&deg;C</b> in meno rispetto a uno esposto a sud alla stessa quota: a fine estate quella differenza sposta una stazione dentro o fuori la finestra.</p>
+
+<h3>7. Le specie e le loro soglie</h3>
+<div id="tabspecie"></div>
+<p>La colonna <b>Veto caldo</b> &egrave; la temperatura dell&rsquo;aria, mediata su cinque giorni, oltre la quale l&rsquo;indice della specie viene azzerato se nello stesso periodo &egrave; caduto meno di 1&nbsp;mm di pioggia al giorno. Deriva dal valore di riferimento del porcino spostato dello scarto indicato al punto 4.</p>
+<p>Le soglie termiche derivano dalla letteratura micologica corrente sulle esigenze ecologiche di ciascuna specie. Sono valori indicativi: la variabilit&agrave; fra popolazioni locali &egrave; alta, e su suoli e coperture diverse la stessa specie si comporta diversamente. <b>Sono il primo parametro da rivedere con un micologo che conosca le vostre zone.</b></p>
+
+<h3>8. Che cosa non c&rsquo;&egrave; nel modello</h3>
+<ul>
+<li><b>La pendenza e l&rsquo;esposizione reali del punto.</b> Il consiglio sul versante del punto 6 dice da che parte conviene spostarsi, ma non sa com&rsquo;&egrave; fatto il versante dove andrai davvero: servirebbe un modello digitale del terreno incrociato con il punto di ricerca, non con la stazione.</li>
+<li><b>Il tipo di bosco esatto.</b> Le due cartografie si compensano ma nessuna delle due &egrave; completa: l&rsquo;Inventario 1978 dice la specie arborea ma su una griglia da 400 m e con quasi mezzo secolo sulle spalle; l&rsquo;UCS 2019 &egrave; aggiornato e ben disegnato ma si ferma a latifoglie, conifere e misti. Incrociale, e comunque la pianta la riconosci tu sul posto.</li>
+<li><b>Copertura reale del punto.</b> Il modello globale non sa se quel pixel &egrave; faggeta o pascolo. Sotto chioma chiusa con lettiera spessa il suolo sta tipicamente 2&ndash;4&nbsp;&deg;C sotto il valore modellato, e si asciuga molto pi&ugrave; lentamente.</li>
+<li><b>Micorrizia e storia del sito.</b> Un bosco senza micelio non produce nemmeno con il clima perfetto. Le stazioni produttive sono quelle che conosci gi&agrave;.</li>
+<li><b>Fruttificazioni precedenti.</b> Dopo una buttata abbondante il micelio ha bisogno di ricaricarsi: la seconda buttata a breve distanza &egrave; sempre pi&ugrave; magra.</li>
+<li><b>Vento.</b> Asciuga la lettiera e conta sul campo, ma non entra nell&rsquo;indice: l&rsquo;effetto &egrave; gi&agrave; dentro l&rsquo;umidit&agrave; del suolo modellata, e contarlo due volte sarebbe sbagliato.</li>
+</ul>
+
+<h3>9. Rappresentativit&agrave; spaziale</h3>
+<p>Un valore di stazione rappresenta pochi chilometri quadrati, non una valle. Il 21 agosto 2026 la stazione di Iera (538&nbsp;m) ha misurato 364&nbsp;mm e quella di Parana (695&nbsp;m), a una quindicina di chilometri, <b>22,9&nbsp;mm</b>. Stesso evento, stesso giorno. Se la stazione pi&ugrave; vicina al tuo bosco &egrave; a venti chilometri e dietro un crinale, il dato dice poco.</p>
+
+<h3>10. Usare i dati grezzi per altre specie</h3>
+<p>La scheda di ogni stazione riporta tutti i valori misurati e modellati, non solo l&rsquo;indice. Chi cerca specie non previste pu&ograve; ragionare direttamente su quelli. Come traccia: le specie termofile mediterranee lavorano sopra i 18&nbsp;&deg;C di suolo; le specie autunnali di faggeta sotto i 15; le saprotrofe come i chiodini rispondono pi&ugrave; alla bagnatura prolungata che allo shock termico; i tartufi seguono un&rsquo;altra logica ancora, legata al bilancio idrico stagionale e non ai singoli eventi.</p>
+
+<h3>11. Aggiornamento</h3>
+<p>La pioggia SIR arriva da uno scarico periodico: la data dell&rsquo;ultimo giorno misurato &egrave; scritta nella barra in alto. Oltre quella data i giorni mostrati usano solo dati modellati e la barra lo dichiara. Temperature e umidit&agrave; del suolo coprono anche alcuni giorni di previsione, utili per decidere quando andare.</p>
+
+<h2 style="margin-top:26px">Avvertenze</h2>
+<div class="avviso">
+Modello sperimentale, nessuna garanzia sui risultati. Un indice alto non &egrave; una promessa di raccolto e un indice basso non esclude nulla.<br><br>
+<b>Raccogli solo quello che riconosci con certezza.</b> Nessun indicatore meteorologico sostituisce la determinazione della specie. In caso di dubbio rivolgiti a un ispettorato micologico ASL, il servizio &egrave; gratuito.<br><br>
+Rispetta i regolamenti regionali e provinciali: tesserino dove previsto, limiti di quantit&agrave; giornalieri, divieti nelle aree protette e nei fondi chiusi.
+</div>
+
+<div class="colophon" id="colophon"></div>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let DATI, DATE, ST, ULTIMA_PIOGGIA, AGGIORNATO, VERSIONE, RAMO;
+
+/* La versione sta nel file di configurazione del ramo, ed e' li' che la
+   leggiamo: cosi' compare subito, anche prima che arrivino i dati e anche
+   se dati.json fosse vecchio. Se config.json non c'e', ripieghiamo su
+   quella scritta dentro dati.json. */
+function mostraVersione(){
+  if(!VERSIONE) return;
+  document.title='Cercafunghi '+VERSIONE+' \u2014 zone di raccolta';
+  const e=document.getElementById('versione');
+  if(e) e.textContent='Ver. '+VERSIONE;
+}
+/* I due file si scaricano insieme, ma l'app parte solo quando sono
+   arrivati ENTRAMBI: i parametri dell'indice stanno nel config e
+   devono essere gia' applicati prima del primo calcolo.
+   Se config.json manca o e' rotto si prosegue lo stesso, con i
+   valori predefiniti scritti nel blocco PARAMETRI. */
+const pConfig = fetch('config.json?v='+Date.now())
+  .then(r=>r.ok?r.json():null)
+  .catch(()=>null)
+  .then(cfg=>{
+    if(cfg){
+      if(cfg.versione){ VERSIONE=cfg.versione; RAMO=cfg.ramo||''; mostraVersione(); }
+      try{ applicaConfig(cfg); }
+      catch(err){ console.warn('config.json non applicato:', err); }
+    }
+    return cfg;
+  });
+
+const pDati = fetch('dati.json?v='+Date.now())
+  .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+
+Promise.all([pConfig, pDati])
+  .then(([cfg, d])=>{
+    DATI=d; DATE=d.date; ST=d.stazioni;
+    ULTIMA_PIOGGIA=d.ultima_pioggia; AGGIORNATO=d.aggiornato||'';
+    if(!VERSIONE){ VERSIONE=d.versione||''; RAMO=d.ramo||''; mostraVersione(); }
+    document.getElementById('caricamento').remove();
+    avvia();
+  })
+  .catch(e=>{
+    document.getElementById('caricamento').innerHTML=
+      '<b>Non riesco a caricare i dati.</b><br>'+
+      'Se hai aperto il file da una cartella del computer, i browser bloccano la lettura '+
+      'del file dei dati per motivi di sicurezza: usa il link del sito.<br>'+
+      '<span style="font-size:11px;opacity:.7">Dettaglio tecnico: '+e.message+'</span>';
+  });
+
+/* ============================================================
+   PARAMETRI  -  tutto quello che si puo' discutere sta qui
+   ============================================================ */
+
+const SPECIE = [
+ {id:'aestivalis', nome:'Porcino estatino', lat:'Boletus aestivalis',
+  ts:[14,16,21,23], mesi:[6,7,8,9,10], lag:[8,18], gr:'porcini',
+  alberi:'Castagno, cerro, roverella, faggio alle quote basse',
+  wms:['502','504','503','501','525','526'],
+  note:'Il primo a partire. Tollera bene il caldo purche\u0300 il suolo resti umido.'},
+ {id:'aereus', nome:'Porcino nero', lat:'Boletus aereus',
+  ts:[16,19,24,26], mesi:[7,8,9,10], lag:[8,16], gr:'porcini',
+  alberi:'Roverella, cerro, leccio, castagno caldo. Quote basse e medie',
+  wms:['503','504','506','502'],
+  note:'Il piu\u0300 termofilo. Quando gli altri porcini sono fuori finestra per caldo, lui e\u0300 dentro.'},
+ {id:'edulis', nome:'Porcino', lat:'Boletus edulis',
+  ts:[10,13,19,21], mesi:[8,9,10,11], lag:[10,20], gr:'porcini',
+  alberi:'Faggio, abete bianco, castagno, querce di quota',
+  wms:['501','507','502','511'],
+  note:'Vuole il calo termico. Sotto i 19 gradi di suolo comincia la sua finestra.'},
+ {id:'pinophilus', nome:'Porcino dei pini', lat:'Boletus pinophilus',
+  ts:[9,12,18,20], mesi:[5,6,9,10,11], lag:[10,20], gr:'porcini',
+  alberi:'Pino silvestre e nero, faggio su suolo acido',
+  wms:['509','508','501','514'],
+  note:'Doppia stagione, primaverile e autunnale. Suoli acidi e sabbiosi.'},
+ {id:'caesarea', nome:'Ovolo buono', lat:'Amanita caesarea',
+  ts:[18,20,26,28], mesi:[7,8,9], lag:[6,14], gr:'altri',
+  alberi:'Querce, castagno, leccio',
+  wms:['503','504','506','502'],
+  note:'Molto termofilo. Risponde in fretta alla pioggia, con latenza breve.'},
+ {id:'cantharellus', nome:'Finferlo, galletto', lat:'Cantharellus cibarius',
+  ts:[11,14,20,22], mesi:[6,7,8,9,10], lag:[12,25], gr:'altri',
+  alberi:'Faggio, castagno, abete, querce. Suoli muscosi e acidi',
+  wms:['501','502','507','511'],
+  note:'Vuole umidita\u0300 prolungata piu\u0300 che il singolo evento. Latenza lunga.'},
+ {id:'armillaria', nome:'Chiodino', lat:'Armillaria mellea',
+  ts:[6,9,15,17], mesi:[9,10,11], lag:[8,18], gr:'altri',
+  alberi:'Ceppaie e radici di latifoglie, robinia, pioppo, gelso',
+  wms:['511','513','516','518'],
+  note:'Saprotrofo, non micorrizico: cresce sul legno morto. Tardo autunnale.'}
+];
+
+/* selezioni: due generiche in cima, poi le singole specie */
+const SEL = [
+ {id:'porcini', nome:'Porcini', sub:'tutte le specie', gruppo:'porcini'},
+ {id:'altri',   nome:'Altri funghi', sub:'ovolo, finferlo, chiodino', gruppo:'altri'}
+].concat(SPECIE.map(s=>({id:s.id, nome:s.nome, sub:s.lat, sp:s})));
+
+/* ============================================================
+   PARAMETRI DELL'INDICE
+
+   I valori qui sotto sono solo i PREDEFINITI di sicurezza: servono
+   se config.json manca o e' malformato. I valori realmente usati
+   arrivano da A1/config.json, blocco "indice", e sostituiscono
+   questi all'avvio tramite applicaConfig().
+
+   Per regolare l'indice si modifica config.json, MAI questo blocco.
+
+   Provenienza dei valori: scelti a mano, non calibrati su
+   osservazioni di campo. Unica eccezione parziale la finestra di
+   pioggia a 15 giorni, che ha un aggancio in letteratura.
+   ============================================================ */
+let PESI = {termico:0.45, idrico:0.40, innesco:0.10, stagione:0.05};
+let SBARRA_T = 25, SBARRA_MAX = 35;
+let SM_SOGLIE = [0.10, 0.20, 0.35, 0.45], SM_CODA = 40;
+/* lettiera secca: il micelio sta in profondita', ma il fungo per uscire
+   deve attraversare lo strato superficiale. Se sopra e' secco, aborta.
+   Per disattivare questa penalita' basta mettere penalita: 1.0 nel config. */
+let SM0_SECCA = 0.08, SM0_PENALITA = 0.75;
+let P15_SOGLIE = [20, 60, 200, 350], P15_CODA = 50;
+let EVENTO_MM = 20, EVENTO_GG = 2, EVENTO_FINESTRA = 30;
+/* indice di gruppo: premia chi ha almeno una specie in condizione,
+   ma tiene conto anche di quante ne sono in condizione insieme */
+let GRUPPO_MAX = 0.70, GRUPPO_MEDIA = 0.30;
+/* come si pesano fra loro umidita' del suolo e pioggia cumulata */
+let MIX_SM = 0.60, MIX_P = 0.40;
+
+/* ---------------------------------------------------------------
+   VETI - condizioni necessarie
+
+   Non sono pesi: se una di queste condizioni non e' rispettata
+   l'indice va a zero, per quanto tutto il resto sia favorevole.
+   Un peso sbagliato altera l'ordine e prima o poi si nota; un veto
+   sbagliato azzera una zona, non ci vai, e non scopri mai di esserti
+   perso qualcosa. Per questo le soglie sono volutamente LARGHE.
+
+   Provenienza:
+   - finestra termica e regola caldo+secco: osservate su 1905 carpofori
+     di Boletus edulis in faggete tedesche, 2015-2024 (Bielefeld).
+     La finestra osservata era 7-19 gradi di temperatura dell'aria
+     mediata su 5 giorni, con nessun carpoforo sopra 17,5 gradi quando
+     la pioggia media giornaliera stava sotto 1 mm. Qui e' allargata
+     di 2 gradi per lato, perche' il dato viene da faggete del nord
+     Europa e non e' detto valga identico in Toscana.
+   - siccita' prolungata: STIMA, non letteratura. Gli studi mediterranei
+     usano bilanci idrici tarati sul posto, non soglie trasferibili.
+     Il valore e' tenuto molto basso apposta.
+   --------------------------------------------------------------- */
+let VETI_ATTIVI    = true;
+let VETO_TA_MIN    = 5;      // gradi, aria media su piu' giorni
+let VETO_TA_MAX    = 21;     // gradi
+let VETO_TA_GIORNI = 5;      // su quanti giorni mediare l'aria
+let VETO_CALDO     = 19;     // sopra questa aria media... (riferita a edulis)
+let VETO_CALDO_MM  = 1;      // ...serve almeno questa pioggia al giorno
+let VETO_P30_MM    = 15;     // pioggia minima in 30 giorni (stima)
+
+/* Scarti in gradi rispetto alla soglia di Boletus edulis, che vale 0.
+   Un'unica manopola nel config - caldo_sopra - alza o abbassa tutta la
+   scala mantenendo le distanze fra le specie.
+   Ricavati dallo scarto fra la fine dell'ottimo termico del suolo di
+   ciascuna specie e quella di edulis. ESTRAPOLAZIONE: il dato osservato
+   riguarda solo edulis. */
+let VETO_CALDO_SCARTO = {
+  armillaria:-4, pinophilus:-1, edulis:0,
+  cantharellus:1, aestivalis:2, aereus:5, caesarea:7
+};
+
+/* soglia del veto caldo per una singola specie */
+function caldoSpecie(sp){
+  const s = (sp && VETO_CALDO_SCARTO[sp.id]) || 0;
+  return VETO_CALDO + s;
+}
+
+/* Legge il blocco "indice" del config e sostituisce i predefiniti.
+   Ogni valore e' facoltativo: quelli assenti restano ai predefiniti,
+   cosi' un config incompleto non rompe niente. */
+function applicaConfig(cfg){
+  const c = (cfg && cfg.indice) || null;
+  if(!c) return;
+  const num = (v,d)=> (typeof v==='number' && isFinite(v)) ? v : d;
+  const arr4 = (v,d)=> (Array.isArray(v) && v.length===4 &&
+                        v.every(x=>typeof x==='number' && isFinite(x))) ? v : d;
+  if(c.pesi){
+    PESI = {termico: num(c.pesi.termico, PESI.termico),
+            idrico:  num(c.pesi.idrico,  PESI.idrico),
+            innesco: num(c.pesi.innesco, PESI.innesco),
+            stagione:num(c.pesi.stagione,PESI.stagione)};
+  }
+  if(c.sbarra_termica){
+    SBARRA_T   = num(c.sbarra_termica.soglia,  SBARRA_T);
+    SBARRA_MAX = num(c.sbarra_termica.massimo, SBARRA_MAX);
+  }
+  if(c.umidita_profonda){
+    SM_SOGLIE = arr4(c.umidita_profonda.soglie, SM_SOGLIE);
+    SM_CODA   = num(c.umidita_profonda.coda,    SM_CODA);
+  }
+  if(c.umidita_superficiale){
+    SM0_SECCA    = num(c.umidita_superficiale.secca_sotto, SM0_SECCA);
+    SM0_PENALITA = num(c.umidita_superficiale.penalita,    SM0_PENALITA);
+  }
+  if(c.pioggia_15gg){
+    P15_SOGLIE = arr4(c.pioggia_15gg.soglie, P15_SOGLIE);
+    P15_CODA   = num(c.pioggia_15gg.coda,    P15_CODA);
+  }
+  if(c.evento_innesco){
+    EVENTO_MM       = num(c.evento_innesco.mm,       EVENTO_MM);
+    EVENTO_GG       = num(c.evento_innesco.giorni,   EVENTO_GG);
+    EVENTO_FINESTRA = num(c.evento_innesco.finestra, EVENTO_FINESTRA);
+  }
+  if(c.gruppo){
+    GRUPPO_MAX   = num(c.gruppo.peso_massimo, GRUPPO_MAX);
+    GRUPPO_MEDIA = num(c.gruppo.peso_medio,   GRUPPO_MEDIA);
+  }
+  if(c.mix_idrico){
+    MIX_SM = num(c.mix_idrico.peso_umidita, MIX_SM);
+    MIX_P  = num(c.mix_idrico.peso_pioggia, MIX_P);
+  }
+  if(c.veti){
+    if(typeof c.veti.attivi === 'boolean') VETI_ATTIVI = c.veti.attivi;
+    VETO_TA_MIN    = num(c.veti.aria_min,        VETO_TA_MIN);
+    VETO_TA_MAX    = num(c.veti.aria_max,        VETO_TA_MAX);
+    VETO_TA_GIORNI = num(c.veti.aria_giorni,     VETO_TA_GIORNI);
+    VETO_CALDO     = num(c.veti.caldo_sopra,     VETO_CALDO);
+    VETO_CALDO_MM  = num(c.veti.caldo_pioggia_mm,VETO_CALDO_MM);
+    VETO_P30_MM    = num(c.veti.pioggia_30gg_mm, VETO_P30_MM);
+    if(c.veti.caldo_scarto_specie){
+      Object.keys(VETO_CALDO_SCARTO).forEach(function(k){
+        VETO_CALDO_SCARTO[k] = num(c.veti.caldo_scarto_specie[k], VETO_CALDO_SCARTO[k]);
+      });
+    }
+  }
+}
+
+/* ============================================================ */
+
+function trapezio(v,s,coda){
+  if(v===null||v===undefined||isNaN(v)) return null;
+  const [a,b,c,d]=s;
+  if(v<=a) return 0;
+  if(v<b)  return (v-a)/(b-a)*100;
+  if(v<=c) return 100;
+  if(v<d)  return 100-(v-c)/(d-c)*(100-(coda||0));
+  return coda||0;
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function innescoGiorni(st,i){
+  for(let k=0;k<EVENTO_FINESTRA;k++){
+    const j=i-k; if(j<1) break;
+    const a=st.pio[j], b=st.pio[j-1];
+    if(a===null||b===null) continue;
+    if(a+b>=EVENTO_MM) return k;
+  }
+  return null;
+}
+function pInnesco(g,lag){
+  if(g===null) return 0;
+  const [a,b]=lag, meta=(b-a)/2+1;
+  if(g>=a&&g<=b) return 100;
+  return Math.max(0, 100-(g<a?a-g:g-b)/meta*100);
+}
+
+/* Media di una serie sugli ultimi n giorni che finiscono in i.
+   Restituisce null se non c'e' abbastanza roba: un veto non deve mai
+   scattare per mancanza di dati, solo per dati che dicono di no. */
+function mediaIndietro(serie,i,n){
+  if(!serie) return null;
+  let somma=0, quanti=0;
+  for(let k=0;k<n;k++){
+    const j=i-k; if(j<0) break;
+    const v=serie[j];
+    if(v!==null&&v!==undefined&&!isNaN(v)){ somma+=v; quanti++; }
+  }
+  if(quanti < Math.ceil(n*0.6)) return null;
+  return somma/quanti;
+}
+
+/* Condizioni necessarie. Restituisce null se e' tutto a posto,
+   altrimenti il motivo per cui l'indice va azzerato. */
+function veto(st,i,sp){
+  if(!VETI_ATTIVI) return null;
+
+  const ta = mediaIndietro(st.ta,i,VETO_TA_GIORNI);
+  if(ta!==null){
+    if(ta < VETO_TA_MIN) return 'aria troppo fredda ('+ta.toFixed(1)+' \u00B0C di media)';
+    if(ta > VETO_TA_MAX) return 'aria troppo calda ('+ta.toFixed(1)+' \u00B0C di media)';
+
+    /* caldo e secco insieme: e' la combinazione a fermare tutto, il caldo
+       da solo no. La soglia dipende dalla specie: il porcino nero regge
+       parecchi gradi in piu' del chiodino. */
+    const limite = caldoSpecie(sp);
+    const pio = mediaIndietro(st.pio,i,VETO_TA_GIORNI);
+    if(ta > limite && pio!==null && pio < VETO_CALDO_MM){
+      return 'caldo senza pioggia ('+ta.toFixed(1)+' \u00B0C sopra '+limite
+             +', '+pio.toFixed(1)+' mm al giorno)';
+    }
+  }
+
+  const p30 = st.p30 ? st.p30[i] : null;
+  if(p30!==null && p30!==undefined && p30 < VETO_P30_MM){
+    return 'siccita\u2019 prolungata ('+p30.toFixed(0)+' mm in 30 giorni)';
+  }
+  return null;
+}
+
+function valuta(st,i,sp){
+  const ts=st.ts[i], sm=st.sm[i], p15=st.p15[i];
+  const T=trapezio(ts,sp.ts,0);
+  const iSM=trapezio(sm,SM_SOGLIE,SM_CODA), iP=trapezio(p15,P15_SOGLIE,P15_CODA);
+  let I = (iSM!==null&&iP!==null) ? MIX_SM*iSM+MIX_P*iP : (iSM!==null?iSM:iP);
+  const sm0=st.sm0?st.sm0[i]:null;
+  if(I!==null && sm0!==null && sm0!==undefined && sm0<SM0_SECCA) I*=SM0_PENALITA;
+  const gi=innescoGiorni(st,i), N=pInnesco(gi,sp.lag);
+  const S=sp.mesi.includes(+DATE[i].slice(5,7))?100:25;
+  let tot=null;
+  if(T!==null&&I!==null){
+    tot=PESI.termico*T+PESI.idrico*I+PESI.innesco*N+PESI.stagione*S;
+    if(T<SBARRA_T) tot=Math.min(tot,SBARRA_MAX);
+    tot=Math.round(clamp(tot,0,100));
+  }
+  if(st.sospetta) tot=0;
+
+  /* i primi due veti sono condizioni del posto, uguali per tutti;
+     quello su caldo e siccita' dipende dalla specie */
+  const bloccato = veto(st,i,sp);
+  if(bloccato!==null && tot!==null) tot=0;
+
+  return {T:T===null?null:Math.round(T), I:I===null?null:Math.round(I),
+          N:Math.round(N), S:S, gi:gi, tot:tot, veto:bloccato};
+}
+
+/* tutte le specie in un colpo + i due indici di gruppo */
+function valutaTutto(st,i){
+  const r={sp:{}};
+  SPECIE.forEach(sp=>{ r.sp[sp.id]=valuta(st,i,sp); });
+  ['porcini','altri'].forEach(g=>{
+    const v=SPECIE.filter(s=>s.gr===g).map(s=>r.sp[s.id].tot).filter(x=>x!==null);
+    if(!v.length){ r[g]={tot:null}; return; }
+    const mx=Math.max(...v), md=v.reduce((a,b)=>a+b,0)/v.length;
+    const migliore=SPECIE.filter(s=>s.gr===g).reduce((a,b)=>(r.sp[b.id].tot||-1)>(r.sp[a.id].tot||-1)?b:a);
+    r[g]={tot:Math.round(GRUPPO_MAX*mx+GRUPPO_MEDIA*md), migliore:migliore};
+  });
+  return r;
+}
+
+/* consiglio sul versante, ricavato dai dati del giorno */
+function versante(st,i,sp){
+  const ts=st.ts[i], sm=st.sm[i];
+  if(ts===null) return 'Dati termici non disponibili.';
+  const [a,b,c,d]=sp.ts;
+  let v;
+  if(ts>=d)      v='Suolo troppo caldo di '+(ts-c).toFixed(1)+' \u00b0C. Solo versanti <b>nord e nord-est</b>, fondi di compluvio, sotto chioma fitta: possono valere 3\u20134 \u00b0C in meno.';
+  else if(ts>c)  v='Al limite caldo. Cerca sui versanti <b>nord e nord-est</b>, nelle vallecole ombrose e sotto copertura chiusa.';
+  else if(ts>=(b+c)/2) v='Dentro la finestra, met\u00e0 calda. Preferisci <b>nord, nord-est ed est</b>; evita i crinali esposti a sud.';
+  else if(ts>=b) v='Dentro la finestra, met\u00e0 fresca. Vanno bene <b>tutte le esposizioni</b>; con poca acqua privilegia i compluvi.';
+  else if(ts>a)  v='Al limite freddo. Cerca sui versanti <b>sud e sud-ovest</b>, radure e margini soleggiati, dove il suolo si scalda prima.';
+  else           v='Suolo troppo freddo di '+(b-ts).toFixed(1)+' \u00b0C. Solo versanti <b>sud e sud-ovest</b> ben esposti, e comunque poco probabile.';
+  if(sm!==null&&sm<0.15) v+=' Umidit\u00e0 bassa: stai vicino a impluvi, fossi e sorgenti, dove l\u2019acqua si trattiene.';
+  else if(sm!==null&&sm>0.38) v+=' Suolo molto bagnato: evita i fondi e le conche, sali sulle mezze coste dove sgronda.';
+  return v;
+}
+
+function avvia(){
+
+/* serie pluviometrica sospetta: confronto con le 5 stazioni piu' vicine */
+(function(){
+  const N=DATE.length-1;
+  const dist=(a,b)=>{const dx=(a.lon-b.lon)*Math.cos(a.lat*Math.PI/180),dy=a.lat-b.lat;return dx*dx+dy*dy;};
+  ST.forEach(s=>{
+    const p=s.p15[N];
+    if(p===null){ s.sospetta=false; return; }
+    const vic=ST.filter(x=>x!==s&&x.p15[N]!==null).sort((a,b)=>dist(s,a)-dist(s,b))
+               .slice(0,5).map(x=>x.p15[N]).sort((a,b)=>a-b);
+    s.sospetta = (p<4 && (vic.length?vic[Math.floor(vic.length/2)]:0)>45);
+  });
+})();
+
+/* ---------------- colori ---------------- */
+const COL={nullo:'#9C9384',basso:'#B8862B',medio:'#8A8A3C',buono:'#3E6B34',ottimo:'#1F5A2E'};
+function colore(v){
+  if(v===null||v===undefined) return COL.nullo;
+  if(v>=75) return COL.ottimo;
+  if(v>=55) return COL.buono;
+  if(v>=35) return COL.medio;
+  if(v>=15) return COL.basso;
+  return COL.nullo;
+}
+
+/* ---------------- stato ---------------- */
+function giornoIniziale(){
+  const oggi=new Date();
+  const iso=oggi.getFullYear()+'-'+String(oggi.getMonth()+1).padStart(2,'0')
+    +'-'+String(oggi.getDate()).padStart(2,'0');
+  let k=DATE.indexOf(iso);
+  if(k>=0) return k;
+  for(let j=DATE.length-1;j>=0;j--) if(DATE[j]<=iso) return j;   /* il piu' vicino nel passato */
+  return DATE.length-1;
+}
+let selIdx=0, gIdx=giornoIniziale(), sel=null,
+    qmin=0, cerca='', sortk='tot', sortd=-1;
+const AREE=[...new Set(ST.map(s=>s.a))].sort();
+let attive=new Set(AREE);
+const cache=new Map();
+function V(st){ const k=st.c+'|'+gIdx;
+  if(!cache.has(k)) cache.set(k, valutaTutto(st,gIdx));
+  return cache.get(k); }
+function indice(st){ const v=V(st), s=SEL[selIdx];
+  return s.sp ? v.sp[s.id].tot : v[s.gruppo].tot; }
+function specieAttiva(st){ const s=SEL[selIdx];
+  return s.sp ? s.sp : (V(st)[s.gruppo].migliore || SPECIE[0]); }
+
+/* ---------------- mappa ---------------- */
+const map=L.map('map',{scrollWheelZoom:false}).setView([43.5,11.1],8);
+const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,maxNativeZoom:16,opacity:.72,
+ attribution:'&copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) &middot; pioggia SIR Regione Toscana &middot; suolo Open-Meteo'});
+const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,
+ attribution:'Immagini Esri, Maxar &middot; pioggia SIR &middot; suolo Open-Meteo'});
+const etich=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:18});
+const strade=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,opacity:.8,attribution:'&copy; OpenStreetMap contributors'});
+const rilievo=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',{maxZoom:17,maxNativeZoom:13,opacity:.85,attribution:'Rilievo Esri'});
+topo.addTo(map);
+L.control.layers({'Topografica':topo,'Satellite':sat,'Stradale':strade,'Rilievo':rilievo},{'Etichette luoghi':etich},{position:'topright',collapsed:true}).addTo(map);
+map.on('baselayerchange',e=>{ if(e.name==='Satellite'){ if(!map.hasLayer(etich)) etich.addTo(map); }
+ else if(map.hasLayer(etich)) map.removeLayer(etich); });
+L.control.scale({imperial:false,position:'bottomleft'}).addTo(map);
+
+/* ---------------- strati cartografici dei boschi ----------------
+   Due riquadri distinti, tutti e due sotto i cerchi delle stazioni
+   (che Leaflet disegna nell'overlayPane a 400):
+     boschiUcs  340  - uso del suolo 2019, in basso
+     boschiIft  360  - inventario forestale 1978, sopra                       */
+const WMS='https://www502.regione.toscana.it/wmsraster/com.rt.wms.RTmap/wms?map=wmsucs';
+map.createPane('boschiUcs'); map.getPane('boschiUcs').style.zIndex=340;
+map.createPane('boschiIft'); map.getPane('boschiIft').style.zIndex=360;
+const layer=L.layerGroup().addTo(map);
+
+const stile=document.createElement('style'); document.head.appendChild(stile);
+let opIft=0.95, opUcs=0.75;
+
+/* ---- Inventario Forestale 1978: uno strato per tipo di bosco ---- */
+const BOSCHI=[
+ ['501','Faggete','#C0392B'],['502','Castagneti','#E8751A'],['525','Castagneto da frutto','#E8C41A'],
+ ['503','Roverella','#8E44AD'],['504','Cerrete','#2471C4'],['506','Leccete','#12A08A'],
+ ['505','Carpino nero','#A0522D'],['507','Abetine','#1E7B3C'],['509','Pinete di pino nero','#2E4A6B'],
+ ['508','Pinete mediterranee','#7A9E5B'],['511','Misti prev. latifoglie','#B08D2A'],
+ ['513','Latifoglie varie','#9C5A2E'],['516','Boschetti latifoglie','#6C3483'],
+ ['518','Formazioni riparie','#0E8F9E'],['514','Conifere varie','#4A5D6B']
+];
+function hue(hex){
+  const r=parseInt(hex.substr(1,2),16)/255,g=parseInt(hex.substr(3,2),16)/255,b=parseInt(hex.substr(5,2),16)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  if(!d) return 0;
+  let x; if(mx===r) x=((g-b)/d)%6; else if(mx===g) x=(b-r)/d+2; else x=(r-g)/d+4;
+  x*=60; return x<0?x+360:x;
+}
+/* Il servizio disegna le celle dell'Inventario come contorno tratteggiato
+   sottile, non come area piena, e non espone stili alternativi. Per renderle
+   leggibili sul satellite tingiamo il tratto del colore assegnato e gli
+   mettiamo attorno un alone dello stesso colore, ripetuto piu' volte: le
+   linee si ingrossano e la cella si legge da lontano. */
+function scriviStile(){
+  stile.textContent = BOSCHI.map(([cod,,col])=>
+    '.wmsf-'+cod+'{filter:grayscale(1) sepia(1) hue-rotate('+Math.round(hue(col)-40)
+    +'deg) saturate(9) brightness(1.15) contrast(1.2)'
+    +' drop-shadow(0 0 2px '+col+') drop-shadow(0 0 2px '+col+')'
+    +' drop-shadow(0 0 3px #000);opacity:'+opIft+'}').join('\n')
+    + '\n.wmsucs{opacity:'+opUcs+'}';
+}
+scriviStile();
+
+const iftLayer={}, iftOn=new Set();
+BOSCHI.forEach(([cod])=>{
+  iftLayer[cod]=L.tileLayer.wms(WMS,{layers:'rt_ucs.idift.rt.'+cod,format:'image/png',
+    transparent:true,version:'1.1.1',className:'wmsf-'+cod,pane:'boschiIft',
+    maxZoom:17,maxNativeZoom:14,
+    attribution:'Inventario Forestale della Toscana &mdash; Regione Toscana'});
+});
+const contIft=document.getElementById('boschi-ift');
+BOSCHI.forEach(([cod,nome,col])=>{
+  const b=document.createElement('button');
+  b.className='bof spenta'; b.dataset.cod=cod; b.setAttribute('aria-pressed','false');
+  b.style.background=col; b.style.color='#fff'; b.style.textShadow='0 1px 2px rgba(0,0,0,.55)';
+  b.innerHTML='<b>'+cod+'</b> '+nome;
+  b.onclick=()=>{
+    if(iftOn.has(cod)){ iftOn.delete(cod); map.removeLayer(iftLayer[cod]);
+      b.setAttribute('aria-pressed','false'); b.classList.add('spenta'); }
+    else { iftOn.add(cod); iftLayer[cod].addTo(map);
+      b.setAttribute('aria-pressed','true'); b.classList.remove('spenta'); }
+  };
+  contIft.appendChild(b);
+});
+document.getElementById('opac-ift').oninput=e=>{ opIft=e.target.value/100; scriviStile(); };
+document.getElementById('ift-spegni').onclick=()=>{
+  [...iftOn].forEach(c=>map.removeLayer(iftLayer[c]));
+  iftOn.clear();
+  contIft.querySelectorAll('.bof').forEach(b=>{ b.setAttribute('aria-pressed','false'); b.classList.add('spenta'); });
+};
+
+/* ---- Uso e copertura del suolo 2019: strato unico + legenda ---- */
+const STRATO_UCS='rt_ucs.iducs.10k.2019.rt.full';
+const LEGENDA_UFFICIALE=WMS+'&language=ita&version=1.3.0&service=WMS&request=GetLegendGraphic'
+  +'&sld_version=1.1.0&layer='+STRATO_UCS+'&format=image/png&STYLE=default';
+
+/* colori letti direttamente dalla legenda del servizio */
+const CLASSI=[
+ ['311','Boschi di latifoglie','#80FF00'],
+ ['312','Boschi di conifere','#00A600'],
+ ['313','Boschi misti conifere e latifoglie','#4CFF00'],
+ ['324','Vegetazione boschiva e arbustiva in evoluzione','#A6F200'],
+ ['322','Brughiere e cespuglieti','#A6FF80'],
+ ['323','Vegetazione sclerofilla','#CCF24D'],
+ ['321','Pascolo naturale e praterie','#CCF24D'],
+ ['333','Aree con vegetazione rada','#CCFFCC'],
+ ['3331','Cesse parafuoco','#AFFFAA'],
+ ['244','Aree agroforestali','#F2CCA6'],
+ ['243','Colture con spazi naturali importanti','#E6CC4D'],
+ ['223','Oliveti','#F2C068'],
+ ['231','Prati stabili','#E6E64D'],
+ ['332','Rocce nude e affioramenti','#E6CCCC'],
+ ['511','Corsi d\u2019acqua e canali','#13D1EF'],
+ ['512','Specchi d\u2019acqua','#80F2E6']
+];
+const CLASSI_SPECIE={
+ aestivalis:['311','313','324','244'],
+ aereus:['311','313','323','244'],
+ edulis:['311','313','312','324'],
+ pinophilus:['312','313'],
+ caesarea:['311','313','323','324'],
+ cantharellus:['311','312','313','324'],
+ armillaria:['311','313','324','244']
+};
+
+let ucsOn=false;
+const ucsLayer=L.tileLayer.wms(WMS,{layers:STRATO_UCS,format:'image/png',transparent:true,
+  version:'1.1.1',className:'wmsucs',pane:'boschiUcs',maxZoom:18,maxNativeZoom:17,
+  attribution:'Uso e Copertura del Suolo 2019 &mdash; Regione Toscana'});
+const bottoneUcs=document.getElementById('ucs-toggle');
+bottoneUcs.onclick=()=>{
+  ucsOn=!ucsOn;
+  if(ucsOn){ ucsLayer.addTo(map); bottoneUcs.setAttribute('aria-pressed','true');
+    bottoneUcs.textContent='Uso del suolo 2019: acceso'; }
+  else { map.removeLayer(ucsLayer); bottoneUcs.setAttribute('aria-pressed','false');
+    bottoneUcs.textContent='Uso del suolo 2019: spento'; }
+};
+document.getElementById('opac').oninput=e=>{ opUcs=e.target.value/100; scriviStile(); };
+
+function chiaro(hex){
+  const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);
+  return (0.299*r+0.587*g+0.114*b)>150;
+}
+const contBoschi=document.getElementById('boschi');
+CLASSI.forEach(([cod,nome,col])=>{
+  const d=document.createElement('span');
+  d.className='bo'; d.dataset.cod=cod; d.style.background=col;
+  d.style.color = chiaro(col)?'#221E17':'#fff';
+  d.style.textShadow = chiaro(col)?'none':'0 1px 2px rgba(0,0,0,.5)';
+  d.innerHTML='<b>'+cod+'</b> '+nome;
+  contBoschi.appendChild(d);
+});
+document.getElementById('legenda-ufficiale').href=LEGENDA_UFFICIALE;
+
+/* nomi delle classi Corine Land Cover usate dall'UCS toscano,
+   trascritti dalla legenda del servizio */
+const NOMI_UCS={
+ '111':'Zone residenziali a tessuto continuo','112':'Zone residenziali a tessuto discontinuo',
+ '1121':'Pertinenza abitativa, edificato sparso','121':'Aree industriali e commerciali',
+ '1211':'Depuratori','1212':'Impianti fotovoltaici',
+ '122':'Reti stradali, ferroviarie e infrastrutture','1221':'Strade in aree boscate',
+ '123':'Aree portuali','124':'Aeroporti','131':'Aree estrattive',
+ '132':'Discariche, depositi di rottami','133':'Cantieri, edifici in costruzione',
+ '141':'Aree verdi urbane','1411':'Cimiteri','142':'Aree ricreative e sportive',
+ '210':'Seminativi irrigui e non irrigui','2101':'Serre stabili','2102':'Vivai','213':'Risaie',
+ '221':'Vigneti','222':'Frutteti e frutti minori','2221':'Arboricoltura','223':'Oliveti',
+ '231':'Prati stabili','241':'Colture temporanee con colture permanenti',
+ '242':'Sistemi colturali e particellari complessi',
+ '243':'Colture agrarie con spazi naturali importanti','244':'Aree agroforestali',
+ '311':'Boschi di latifoglie','312':'Boschi di conifere',
+ '313':'Boschi misti di conifere e latifoglie','321':'Aree a pascolo naturale e praterie',
+ '322':'Brughiere e cespuglieti','323':'Aree a vegetazione sclerofilla',
+ '324':'Vegetazione boschiva e arbustiva in evoluzione','331':'Spiagge, dune e sabbie',
+ '332':'Rocce nude, falesie, rupi e affioramenti','333':'Aree con vegetazione rada',
+ '3331':'Cesse parafuoco','334':'Aree percorse da incendio','411':'Paludi interne',
+ '421':'Paludi salmastre','423':'Zone intertidali','511':'Corsi d\u2019acqua, canali e idrovie',
+ '512':'Specchi d\u2019acqua','521':'Lagune','523':'Mare'
+};
+const NOMI_IFT=Object.fromEntries(BOSCHI.map(([c,n])=>[c,n]));
+/* campi di servizio che non dicono niente sul bosco */
+const CAMPI_INUTILI=/^(pk_uid|area|perimeter|objectid|id|shape_area|shape_len|.*_id|.*_$)$/i;
+
+function leggiInfo(testo){
+  const righe=testo.split('\n');
+  const esito=[]; let strato=null, campi={};
+  const chiudi=()=>{
+    if(!strato) return;
+    const cod=(strato.match(/idift\.rt\.(\d+)$/)||[])[1];
+    if(cod){                                   /* Inventario 1978 */
+      if(Object.keys(campi).length)
+        esito.push('<b>Bosco 1978:</b> '+(NOMI_IFT[cod]||'codice '+cod)+' ('+cod+')');
+    } else if(strato.indexOf('iducs')>=0){     /* Uso del suolo 2019 */
+      let trovato=null, extra=[];
+      for(const [k,v] of Object.entries(campi)){
+        if(NOMI_UCS[v]) { trovato=v; continue; }
+        if(!CAMPI_INUTILI.test(k) && v && v.length<60) extra.push(v);
+      }
+      if(trovato) esito.push('<b>Uso del suolo 2019:</b> '+NOMI_UCS[trovato]+' ('+trovato+')');
+      else if(extra.length) esito.push('<b>Uso del suolo 2019:</b> '+extra.slice(0,2).join(' \u00b7 '));
+    }
+    strato=null; campi={};
+  };
+  righe.forEach(r=>{
+    const t=r.trim();
+    let m=t.match(/^Layer\s+'([^']+)'/i);
+    if(m){ chiudi(); strato=m[1]; return; }
+    m=t.match(/^([A-Za-z_][\w]*)\s*=\s*'?(.*?)'?$/);
+    if(m && strato) campi[m[1]]=m[2];
+  });
+  chiudi();
+  return esito;
+}
+
+/* interrogazione del punto: chiede a tutti gli strati accesi */
+map.on('click', ev=>{
+  if(!ucsOn && !iftOn.size) return;
+  const info=document.getElementById('bosco-info');
+  const p=map.latLngToContainerPoint(ev.latlng), s=map.getSize(), b=map.getBounds();
+  const strati=[...iftOn].map(c=>'rt_ucs.idift.rt.'+c).concat(ucsOn?[STRATO_UCS]:[]).join(',');
+  const url=WMS+'&service=WMS&version=1.1.1&request=GetFeatureInfo&srs=EPSG:4326'
+   +'&bbox='+[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()].join(',')
+   +'&width='+s.x+'&height='+s.y+'&layers='+strati+'&query_layers='+strati
+   +'&info_format=text/plain&feature_count=5&x='+Math.round(p.x)+'&y='+Math.round(p.y)
+   +'&i='+Math.round(p.x)+'&j='+Math.round(p.y);
+  info.textContent='Interrogo il punto\u2026';
+  fetch(url).then(r=>r.text()).then(t=>{
+    const e=leggiInfo(t);
+    info.innerHTML = e.length
+      ? e.join('<br>')
+      : 'In questo punto nessuno degli strati accesi ha dati. '
+        +'<a href="'+url+'" target="_blank" rel="noopener">Risposta grezza del servizio</a>';
+  }).catch(()=>{
+    info.innerHTML='Lettura diretta bloccata dal browser. <a href="'+url+'" target="_blank" rel="noopener">Apri la risposta del servizio</a>.';
+  });
+});
+
+/* ---------------- selezione ---------------- */
+const contSp=document.getElementById('specie');
+SEL.forEach((s,i)=>{
+  const b=document.createElement('button'); b.className='sp'+(s.sp?'':' sp-gr');
+  b.innerHTML=s.nome+'<small>'+s.sub+'</small>';
+  b.setAttribute('aria-pressed', i===0);
+  b.onclick=()=>{ selIdx=i;
+    contSp.querySelectorAll('.sp').forEach((x,j)=>x.setAttribute('aria-pressed', j===i));
+    render(); };
+  contSp.appendChild(b);
+});
+
+const MESI=['','gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const MESIB=['','gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const DOW=['domenica','luned\u00ec','marted\u00ec','mercoled\u00ec','gioved\u00ec','venerd\u00ec','sabato'];
+function vaiGiorno(d){ gIdx=clamp(d,0,DATE.length-1); render(false); }
+document.getElementById('prev').onclick=()=>vaiGiorno(gIdx-1);
+document.getElementById('next').onclick=()=>vaiGiorno(gIdx+1);
+document.getElementById('oggi').onclick=()=>vaiGiorno(DATE.indexOf(ULTIMA_PIOGGIA));
+document.getElementById('fine').onclick=()=>vaiGiorno(DATE.length-1);
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowLeft') vaiGiorno(gIdx-1);
+  if(e.key==='ArrowRight') vaiGiorno(gIdx+1);
+});
+document.getElementById('q').oninput=e=>{ qmin=+e.target.value; document.getElementById('qv').textContent=qmin; render(); };
+document.getElementById('cerca').oninput=e=>{ cerca=e.target.value.toLowerCase().trim(); render(); };
+
+const chipArea=document.getElementById('chipArea');
+function disegnaChip(){
+  chipArea.innerHTML='';
+  AREE.forEach(a=>{ const b=document.createElement('button'); b.className='chip'; b.textContent=a;
+    b.setAttribute('aria-pressed',attive.has(a));
+    b.onclick=()=>{ attive.has(a)?attive.delete(a):attive.add(a); b.setAttribute('aria-pressed',attive.has(a)); render(); };
+    chipArea.appendChild(b); });
+}
+disegnaChip();
+document.getElementById('tutteAree').onclick=()=>{ attive=new Set(AREE); disegnaChip(); render(); };
+document.getElementById('nessunaArea').onclick=()=>{ attive=new Set(); disegnaChip(); render(); };
+
+document.getElementById('leg').innerHTML=[
+ ['0\u201315 \u2014 fuori condizione',COL.nullo],['15\u201335 \u2014 scarso',COL.basso],
+ ['35\u201355 \u2014 possibile',COL.medio],['55\u201375 \u2014 favorevole',COL.buono],
+ ['75\u2013100 \u2014 molto favorevole',COL.ottimo]
+].map(([t,c])=>'<span class="lg"><span class="sw" style="background:'+c+'"></span>'+t+'</span>').join('')
+ +'<span class="lg"><span class="sw tr"></span>posizione approssimata</span>';
+
+/* ---------------- scheda stazione ---------------- */
+function fmt(v,u,d){ if(v===null||v===undefined) return '\u2013';
+  return (d===0?Math.round(v):v.toFixed(d===undefined?1:d))+(u?' '+u:''); }
+function riga(et,val){ return '<div class="pp-r"><span>'+et+'</span><b>'+val+'</b></div>'; }
+
+function blocco(st,sp,primo){
+  const v=V(st).sp[sp.id];
+  return '<div class="cerca-box"'+(primo?' style="border-color:#8C2F16;border-width:2px"':'')+'>'
+   +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">'
+   +'<b>'+sp.nome+'</b><span class="idx" style="background:'+colore(v.tot)+'">'+(v.tot===null?'\u2013':v.tot)+'</span></div>'
+   +'<div class="vers"><b>Dove cercare:</b> '+sp.alberi+'</div>'
+   +'<div class="vers"><b>Versante:</b> '+versante(st,gIdx,sp)+'</div>'
+   +(v.veto?'<div class="vers" style="color:#8C2F16"><b>Azzerato:</b> '+v.veto+'</div>':'')
+   +'</div>';
+}
+
+function scheda(st){
+  const i=gIdx, s=SEL[selIdx], vt=V(st);
+  const shock=(i>=5&&st.ts[i]!==null&&st.ts[i-5]!==null)?(st.ts[i-5]-st.ts[i]):null;
+  const ant=(st.p30[i]!==null&&st.p15[i]!==null)?st.p30[i]-st.p15[i]:null;
+  let h='<span class="pp-n">'+st.n+'</span><span class="pp-s">'
+    +(st.m?st.m+' \u00b7 ':'')+st.p+' \u00b7 '+st.q+' m slm \u00b7 '+st.a+' \u00b7 '+st.c
+    +' \u00b7 '+DATE[i].split('-').reverse().join('/')+'</span>';
+
+  if(!s.sp){
+    h+='<div class="pp-sec">'+s.nome+' \u2014 indice di gruppo</div>';
+    h+=riga('Indice complessivo', (indice(st)===null?'\u2013':indice(st)+' / 100'));
+    h+='<div class="pp-bar"><i style="width:'+(indice(st)||0)+'%;background:'+colore(indice(st))+'"></i></div>';
+  }
+  const attiva=specieAttiva(st);
+  const ordine=SPECIE.slice().sort((a,b)=>
+    (a.id===attiva.id?-2:0)-(b.id===attiva.id?-2:0)
+    + ((s.sp?0:(a.gr===s.gruppo?-1:0))-(s.sp?0:(b.gr===s.gruppo?-1:0)))
+    + ((vt.sp[b.id].tot||0)-(vt.sp[a.id].tot||0))*0.001);
+  h+='<div class="pp-sec">Valutazione per specie</div>';
+  ordine.forEach((sp,k)=>{ h+=blocco(st,sp,k===0); });
+
+  const va=vt.sp[attiva.id];
+  h+='<div class="pp-sec">Scomposizione &mdash; '+attiva.nome+'</div>';
+  h+=riga('termico (peso 0,45)', fmt(va.T,'',0));
+  h+=riga('idrico (peso 0,40)', fmt(va.I,'',0));
+  h+=riga('innesco (peso 0,10)', fmt(va.N,'',0));
+  h+=riga('stagionale (peso 0,05)', fmt(va.S,'',0));
+
+  h+='<div class="pp-sec">Suolo (modellato)</div>';
+  h+=riga('Temperatura 7\u201328 cm', fmt(st.ts[i],'\u00b0C'));
+  h+=riga('Temperatura 0\u20137 cm', fmt(st.ts0[i],'\u00b0C'));
+  h+=riga('Umidit\u00e0 7\u201328 cm', st.sm[i]===null?'\u2013':st.sm[i].toFixed(3)+' m\u00b3/m\u00b3');
+  h+=riga('Umidit\u00e0 0\u20137 cm (lettiera)', (st.sm0&&st.sm0[i]!==null&&st.sm0[i]!==undefined)?st.sm0[i].toFixed(3)+' m\u00b3/m\u00b3':'\u2013');
+
+  h+='<div class="pp-sec">Pioggia (misurata, SIR)</div>';
+  h+=riga('Del giorno', fmt(st.pio[i],'mm'));
+  h+=riga('Ultimi 7 giorni', fmt(st.p7[i],'mm'));
+  h+=riga('Ultimi 15 giorni', fmt(st.p15[i],'mm'));
+  h+=riga('Ultimi 30 giorni', fmt(st.p30[i],'mm'));
+  h+=riga('Antecedente (30\u221215)', fmt(ant,'mm'));
+  h+=riga('Giorni dall\u2019ultimo evento (innesco)', va.gi===null?'oltre 30':va.gi);
+  h+=riga('Caduta termica su 5 gg (shock)', shock===null?'\u2013':(shock>0?'\u2212':'+')+Math.abs(shock).toFixed(1)+' \u00b0C');
+
+  h+='<div class="pp-sec">Aria (modellata)</div>';
+  h+=riga('Media giornaliera', fmt(st.ta[i],'\u00b0C'));
+  h+=riga('Minima', fmt(st.tmn[i],'\u00b0C'));
+  h+=riga('Massima', fmt(st.tmx[i],'\u00b0C'));
+
+  if(st.pio[i]===null) h+='<span class="pp-w">Pioggia non disponibile per questo giorno: le somme si fermano all\u2019ultimo dato misurato.</span>';
+  if(st.ap) h+='<span class="pp-w">\u2248 posizione geocodificata sul centro abitato, non quella dello strumento</span>';
+  if(st.sospetta) h+='<span class="pp-w">! serie pluviometrica sospetta rispetto alle stazioni vicine. Indice azzerato.</span>';
+  return h;
+}
+
+/* finestra info sul grafico, stessa veste del popup della mappa */
+const plotbox=document.getElementById('plotbox');
+const scpop=document.createElement('div'); scpop.id='scpop'; plotbox.appendChild(scpop);
+function apriSuGrafico(st,cx,cy){
+  const r=plotbox.getBoundingClientRect();
+  scpop.innerHTML='<button class="x" onclick="window.__chiudiPop()">chiudi</button>'+scheda(st);
+  scpop.className='on';
+  const px=cx/900*r.width, py=cy/470*(r.width*470/900);
+  const w=scpop.offsetWidth, h=scpop.offsetHeight;
+  scpop.style.left=Math.round(Math.max(6,Math.min(r.width-w-6,px-w/2)))+'px';
+  scpop.style.top=Math.round(Math.max(6,py-h-14>6?py-h-14:py+16))+'px';
+}
+window.__chiudiPop=()=>{ scpop.className=''; sel=null; render(false); };
+
+/* ---------------- disegno ---------------- */
+function filtra(){ return ST.filter(s=>attive.has(s.a)&&s.q>=qmin&&
+  (cerca===''||s.n.toLowerCase().includes(cerca)||(s.m||'').toLowerCase().includes(cerca))); }
+function raggio(v){ return v===null?4 : 4+Math.sqrt(v)*0.85; }
+
+function disegnaMappa(L_){
+  layer.clearLayers();
+  [...L_].sort((a,b)=>(indice(a)||0)-(indice(b)||0)).forEach(s=>{
+    const v=indice(s);
+    const m=L.circleMarker([s.lat,s.lon],{radius:raggio(v),fillColor:colore(v),fillOpacity:.85,
+      color:s.ap?'#8C2F16':'rgba(255,255,255,.9)',weight:sel===s.c?3:(s.ap?1.8:1.2)});
+    m.bindPopup(()=>scheda(s),{maxWidth:340});
+    m.on('click',e=>{ sel=s.c; scpop.className=''; m.openPopup(); L.DomEvent.stopPropagation(e); render(false); });
+    m.addTo(layer);
+    if(sel===s.c) m.openPopup();
+  });
+}
+
+/* ---------------- grafico navigabile ---------------- */
+let vista={t0:5,t1:32,u0:0,u1:0.50};
+const VISTA0={t0:5,t1:32,u0:0,u1:0.50};
+const W=900,H=470,ml=64,mr=20,mt=26,mb=52;
+const svg=document.getElementById('sc');
+function passo(r){ const n=r/5; const e=Math.pow(10,Math.floor(Math.log10(n)));
+  const m=n/e; return (m<1.5?1:m<3?2:m<7?5:10)*e; }
+function scatter(L_){
+  const sp = SEL[selIdx].sp || SPECIE.filter(s=>s.gr===SEL[selIdx].gruppo)[0];
+  const gr = !SEL[selIdx].sp;
+  const X=v=>ml+(v-vista.t0)/(vista.t1-vista.t0)*(W-ml-mr);
+  const Y=v=>H-mb-(v-vista.u0)/(vista.u1-vista.u0)*(H-mt-mb);
+  let s='<rect class="sc-fondo" x="'+ml+'" y="'+mt+'" width="'+(W-ml-mr)+'" height="'+(H-mt-mb)+'"/>';
+  const finestre = gr ? SPECIE.filter(x=>x.gr===SEL[selIdx].gruppo) : [sp];
+  finestre.forEach(f=>{
+    const x0=Math.max(X(f.ts[1]),ml), x1=Math.min(X(f.ts[2]),W-mr);
+    if(x1<=x0) return;
+    s+='<rect class="band" x="'+x0+'" y="'+Y(SM_SOGLIE[2])+'" width="'+(x1-x0)
+      +'" height="'+(Y(SM_SOGLIE[1])-Y(SM_SOGLIE[2]))+'"/>';
+    s+='<text class="bandlab" x="'+(x0+5)+'" y="'+(Y(SM_SOGLIE[2])-5)+'">'+f.nome+'</text>';
+  });
+  const pt=passo(vista.t1-vista.t0), pu=passo(vista.u1-vista.u0);
+  for(let t=Math.ceil(vista.t0/pt)*pt;t<=vista.t1;t+=pt){
+    s+='<line class="gridline" x1="'+X(t)+'" y1="'+mt+'" x2="'+X(t)+'" y2="'+(H-mb)+'"/>'
+      +'<text class="axlab" x="'+X(t)+'" y="'+(H-mb+16)+'" text-anchor="middle">'+(+t.toFixed(1))+'</text>'; }
+  for(let u=Math.ceil(vista.u0/pu)*pu;u<=vista.u1;u+=pu){
+    s+='<line class="gridline" x1="'+ml+'" y1="'+Y(u)+'" x2="'+(W-mr)+'" y2="'+Y(u)+'"/>'
+      +'<text class="axlab" x="'+(ml-8)+'" y="'+(Y(u)+4)+'" text-anchor="end">'+u.toFixed(2)+'</text>'; }
+  s+='<line class="axis" x1="'+ml+'" y1="'+(H-mb)+'" x2="'+(W-mr)+'" y2="'+(H-mb)+'"/>';
+  s+='<line class="axis" x1="'+ml+'" y1="'+mt+'" x2="'+ml+'" y2="'+(H-mb)+'"/>';
+  s+='<text class="axtitle" x="'+ml+'" y="'+(mt-9)+'">umidit\u00e0 del suolo 7\u201328 cm [m\u00b3/m\u00b3]</text>';
+  s+='<text class="axtitle" x="'+(W-mr)+'" y="'+(H-10)+'" text-anchor="end">temperatura del suolo 7\u201328 cm [\u00b0C]</text>';
+  s+='<clipPath id="cp"><rect x="'+ml+'" y="'+mt+'" width="'+(W-ml-mr)+'" height="'+(H-mt-mb)+'"/></clipPath><g clip-path="url(#cp)">';
+  const pts=L_.filter(x=>x.ts[gIdx]!==null&&x.sm[gIdx]!==null)
+              .sort((a,b)=>(indice(a)||0)-(indice(b)||0));
+  pts.forEach(x=>{ const v=indice(x), r=sel===x.c?9:(v>=55?6.5:v>=35?5:3.8);
+    s+='<circle class="pt" data-c="'+x.c+'" cx="'+X(x.ts[gIdx])+'" cy="'+Y(x.sm[gIdx])+'" r="'+r+'" fill="'+colore(v)+'"'
+      +(sel===x.c?' stroke="#8C2F16" stroke-width="2.5"':'')+'><title>'+x.n+' \u2014 '+(v===null?'n.d.':v)+'</title></circle>'; });
+  const scala=(vista.t1-vista.t0)/(VISTA0.t1-VISTA0.t0);
+  pts.filter(x=>(indice(x)||0)>=(scala<0.6?40:70)).slice(-(scala<0.35?40:14)).forEach(x=>{
+    s+='<text class="ptlab" x="'+(X(x.ts[gIdx])+9)+'" y="'+(Y(x.sm[gIdx])+3.5)+'">'+x.n+'</text>'; });
+  svg.innerHTML=s+'</g>';
+  svg.querySelectorAll('.pt').forEach(c=>c.onclick=ev=>{
+    ev.stopPropagation();
+    const st=ST.find(z=>z.c===c.dataset.c); if(!st) return;
+    sel=st.c; scatter(filtra());
+    apriSuGrafico(st, +c.getAttribute('cx'), +c.getAttribute('cy'));
+  });
+}
+function svgPos(e){ const r=svg.getBoundingClientRect();
+  return {x:(e.clientX-r.left)/r.width*W, y:(e.clientY-r.top)/r.height*H}; }
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const p=svgPos(e), f=e.deltaY<0?0.82:1.22;
+  const tx=vista.t0+(p.x-ml)/(W-ml-mr)*(vista.t1-vista.t0);
+  const uy=vista.u0+(H-mb-p.y)/(H-mt-mb)*(vista.u1-vista.u0);
+  let dt=(vista.t1-vista.t0)*f, du=(vista.u1-vista.u0)*f;
+  dt=clamp(dt,1.5,VISTA0.t1-VISTA0.t0); du=clamp(du,0.03,VISTA0.u1-VISTA0.u0);
+  const rt=(tx-vista.t0)/(vista.t1-vista.t0), ru=(uy-vista.u0)/(vista.u1-vista.u0);
+  vista={t0:tx-rt*dt, t1:tx+(1-rt)*dt, u0:uy-ru*du, u1:uy+(1-ru)*du};
+  scatter(filtra());
+},{passive:false});
+let trascino=null;
+svg.addEventListener('mousedown',e=>{ trascino={p:svgPos(e),v:{...vista}}; svg.classList.add('trascino'); });
+window.addEventListener('mousemove',e=>{
+  if(!trascino) return;
+  const p=svgPos(e), v=trascino.v;
+  const dt=(p.x-trascino.p.x)/(W-ml-mr)*(v.t1-v.t0);
+  const du=(p.y-trascino.p.y)/(H-mt-mb)*(v.u1-v.u0);
+  vista={t0:v.t0-dt,t1:v.t1-dt,u0:v.u0+du,u1:v.u1+du};
+  scatter(filtra());
+});
+window.addEventListener('mouseup',()=>{ trascino=null; svg.classList.remove('trascino'); });
+document.getElementById('reset').onclick=()=>{ vista={...VISTA0}; scatter(filtra()); };
+
+/* ---------------- tabella ---------------- */
+function colonne(){
+  const s=SEL[selIdx];
+  const c=[['n','Stazione','nomeh'],['a','Area','nomeh'],['q','Quota<br>m','num']];
+  c.push(['tot', (s.sp? s.nome : s.nome+'<br>gruppo').replace(/ /g,'<br>'), 'idxh']);
+  SPECIE.forEach(sp=>{ if(!s.sp||sp.id!==s.id)
+    c.push(['sp_'+sp.id, sp.nome.replace(/,? /g,'<br>'), 'idxh']); });
+  c.push(['veto','Azzerato da','testoh'],
+         ['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
+  [['ts','T suolo<br>7\u201328<br>\u00b0C'],['ts0','T suolo<br>0\u20137<br>\u00b0C'],
+   ['sm','Umidit\u00e0<br>7\u201328<br>m\u00b3/m\u00b3'],['sm0','Umidit\u00e0<br>0\u20137<br>m\u00b3/m\u00b3'],
+   ['pio','Pioggia<br>del gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
+   ['ant','Antec.<br>mm'],
+   ['shock','Shock<br>caduta 5 gg<br>\u00b0C'],['gi','Innesco<br>gg da<br>evento'],
+   ['T','Punteggio<br>termico'],['I','Punteggio<br>idrico'],
+   ['ta','T aria<br>media<br>\u00b0C'],['tmn','T aria<br>min<br>\u00b0C'],['tmx','T aria<br>max<br>\u00b0C']]
+   .forEach(([k,l])=>c.push([k,l,'num']));
+  return c;
+}
+function valori(st){
+  const i=gIdx, vt=V(st), attiva=specieAttiva(st), va=vt.sp[attiva.id];
+  const shock=(i>=5&&st.ts[i]!==null&&st.ts[i-5]!==null)?+(st.ts[i-5]-st.ts[i]).toFixed(1):null;
+  const ant=(st.p30[i]!==null&&st.p15[i]!==null)?+(st.p30[i]-st.p15[i]).toFixed(1):null;
+  const o={n:st.n,a:st.a,q:st.q,tot:indice(st),
+    alberi:attiva.alberi, vers:versante(st,i,attiva).replace(/<[^>]+>/g,''),
+    veto:(va.veto||''),
+    ts:st.ts[i],ts0:st.ts0[i],shock:shock,sm:st.sm[i],
+    sm0:(st.sm0?st.sm0[i]:null),pio:st.pio[i],
+    p7:st.p7[i],p15:st.p15[i],p30:st.p30[i],ant:ant,gi:va.gi,T:va.T,I:va.I,
+    ta:st.ta[i],tmn:st.tmn[i],tmx:st.tmx[i]};
+  SPECIE.forEach(sp=>{ o['sp_'+sp.id]=vt.sp[sp.id].tot; });
+  return o;
+}
+function cell(v,k){ if(v===null||v===undefined) return '\u2013';
+  if(k==='sm'||k==='sm0') return v.toFixed(3);
+  return (typeof v==='number'&&!Number.isInteger(v))?v.toFixed(1):v; }
+
+function vai(c){ const s=ST.find(z=>z.c===c); if(!s) return; sel=c;
+  map.setView([s.lat,s.lon],Math.max(map.getZoom(),11));
+  render(false);
+  layer.eachLayer(m=>{ const ll=m.getLatLng();
+    if(Math.abs(ll.lat-s.lat)<1e-9&&Math.abs(ll.lng-s.lon)<1e-9) m.openPopup(); });
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'}); }
+window.__vai=vai;
+
+function aggiornaTesta(){
+  const d=DATE[gIdx], dt=new Date(d+'T12:00:00');
+  document.getElementById('giornoval').textContent=dt.getDate()+' '+MESI[dt.getMonth()+1]+' '+dt.getFullYear();
+  document.getElementById('giornodow').textContent=DOW[dt.getDay()];
+  document.getElementById('prev').disabled=(gIdx===0);
+  document.getElementById('next').disabled=(gIdx===DATE.length-1);
+  const b=document.getElementById('fonte'), ast=document.getElementById('asterisco');
+  if(d<=ULTIMA_PIOGGIA){ b.className='badge mis'; b.textContent='pioggia misurata'; ast.textContent=''; }
+  else { b.className='badge mod'; b.textContent='* oltre il dato SIR';
+    ast.innerHTML='* Dal '+ULTIMA_PIOGGIA.split('-').reverse().join('/')
+      +' in poi la pioggia misurata non c\u2019\u00e8 ancora. Le somme di pioggia si fermano a quella data, '
+      +'mentre temperatura e umidit\u00e0 del suolo sono previsioni. L\u2019indice \u00e8 quindi indicativo: '
+      +'usalo per capire la tendenza, non come misura.'; }
+  const s=SEL[selIdx];
+  let c;
+  if(s.sp){
+    c='<b>'+s.sp.nome+'</b> \u2014 <i>'+s.sp.lat+'</i>. '+s.sp.note
+      +'<br>Finestra termica del suolo <b>'+s.sp.ts[1]+'\u2013'+s.sp.ts[2]+' \u00b0C</b>'
+      +' \u00b7 latenza dopo la pioggia <b>'+s.sp.lag[0]+'\u2013'+s.sp.lag[1]+' giorni</b>'
+      +' \u00b7 stagione <b>'+s.sp.mesi.map(m=>MESIB[m]).join(', ')+'</b>'
+      +'<br>Cerca in: <b>'+s.sp.alberi+'</b>';
+  } else {
+    const g=SPECIE.filter(x=>x.gr===s.gruppo);
+    c='<b>'+s.nome+'</b> \u2014 indice ponderato su '+g.length+' specie: '
+      +g.map(x=>x.nome).join(', ')+'.<br>Vale il 70% della specie migliore pi\u00f9 il 30% della media: '
+      +'premia i posti dove almeno una specie \u00e8 in condizione, e di pi\u00f9 quelli dove ne sono in condizione parecchie.'
+      +'<br>Nella scheda di ogni stazione trovi il dettaglio specie per specie.';
+  }
+  document.getElementById('consiglio').innerHTML=c;
+  const cls = s.sp ? (CLASSI_SPECIE[s.sp.id]||[])
+    : [...new Set(SPECIE.filter(x=>x.gr===s.gruppo).flatMap(x=>CLASSI_SPECIE[x.id]||[]))];
+  contBoschi.querySelectorAll('.bo').forEach(b2=>b2.classList.toggle('sugg', cls.includes(b2.dataset.cod)));
+  const ift = s.sp ? s.sp.wms : [...new Set(SPECIE.filter(x=>x.gr===s.gruppo).flatMap(x=>x.wms))];
+  contIft.querySelectorAll('.bof').forEach(b2=>b2.classList.toggle('sugg', ift.includes(b2.dataset.cod)));
+}
+
+let COLS=[];
+function testata(){
+  COLS=colonne();
+  const thr=document.getElementById('thr'); thr.innerHTML='';
+  COLS.forEach(([k,l,cl])=>{ const th=document.createElement('th');
+    th.innerHTML=l+'<span class="ar">\u25be</span>';
+    if(cl) th.className=cl;
+    th.tabIndex=0; th.dataset.k=k;
+    const go=()=>{ if(sortk===k) sortd*=-1; else {sortk=k; sortd=-1;} render(false); };
+    th.onclick=go; th.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();go();} };
+    thr.appendChild(th); });
+}
+
+function render(fit){
+  aggiornaTesta(); testata();
+  const L_=filtra();
+  document.getElementById('cnt').textContent=
+    L_.length+' stazioni in vista \u00b7 '+L_.filter(s=>(indice(s)||0)>=55).length+' con indice \u2265 55 \u00b7 '
+    +L_.filter(s=>(indice(s)||0)>=75).length+' con indice \u2265 75';
+  disegnaMappa(L_); scatter(L_);
+
+  const S=L_.map(s=>({s:s,v:valori(s)}));
+  S.sort((a,b)=>{ const x=a.v[sortk], y=b.v[sortk];
+    if(typeof x==='string'||typeof y==='string') return sortd*String(x).localeCompare(String(y));
+    return sortd*((x===null||x===undefined?-999:x)-(y===null||y===undefined?-999:y)); });
+  document.querySelectorAll('#thr th').forEach(th=>th.classList.toggle('on',th.dataset.k===sortk));
+  document.getElementById('tb').innerHTML=S.map(({s,v})=>{
+    let r='<tr class="'+(sel===s.c?'sel':'')+'" onclick="window.__vai(\''+s.c+'\')">';
+    r+='<td class="nome">'+s.n+(s.ap?' <span class="flagap" title="posizione approssimata">\u2248</span>':'')
+      +(s.sospetta?' <span class="flagsp" title="serie sospetta">!</span>':'')+'</td>';
+    r+='<td class="area-t">'+s.a+'</td><td class="num">'+s.q+'</td>';
+    COLS.slice(3).forEach(([k])=>{
+      if(k==='tot'||k.startsWith('sp_'))
+        r+='<td class="idxc"><span class="idx" style="background:'+colore(v[k])+'">'+(v[k]===null?'\u2013':v[k])+'</span></td>';
+      else if(k==='alberi'||k==='vers') r+='<td class="testo">'+v[k]+'</td>';
+      else r+='<td class="num">'+cell(v[k],k)+'</td>';
+    });
+    return r+'</tr>'; }).join('');
+
+  if(fit&&L_.length) map.fitBounds(L.latLngBounds(L_.map(s=>[s.lat,s.lon])),{padding:[26,26]});
+}
+
+/* ---------------- esportazione ---------------- */
+function matrice(){
+  const L_=filtra();
+  const int=['Codice','Stazione','Comune','Prov','Area','Quota m','Lat','Lon','Data']
+    .concat(COLS.slice(3).map(c=>c[1].replace(/<br>/g,' ')));
+  const righe=[int];
+  L_.map(s=>({s,v:valori(s)})).sort((a,b)=>(b.v.tot||0)-(a.v.tot||0)).forEach(({s,v})=>{
+    righe.push([s.c,s.n,s.m,s.p,s.a,s.q,s.lat,s.lon,DATE[gIdx]]
+      .concat(COLS.slice(3).map(c=>{ const x=v[c[0]]; return x===null||x===undefined?'':x; })));
+  });
+  return righe;
+}
+document.getElementById('csv').onclick=()=>{
+  const b=new Blob(['\ufeff'+matrice().map(r=>r.join(';')).join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download='cercafunghi_'+(VERSIONE||'')+'_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.csv'; a.click();
+};
+document.getElementById('xlsx').onclick=()=>{
+  if(typeof XLSX==='undefined'){ alert('Libreria Excel non caricata: uso il CSV.'); document.getElementById('csv').click(); return; }
+  const m=matrice(), ws=XLSX.utils.aoa_to_sheet(m);
+  ws['!cols']=m[0].map((h,j)=>({wch: j===1?24 : (h==='Dove cercare')?42 : (h==='Versante consigliato')?60 : Math.max(8,Math.min(16,String(h).length+2))}));
+  ws['!freeze']={xSplit:2,ySplit:1};
+  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:m.length-1,c:m[0].length-1}})};
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Stazioni');
+  const meta=[['Cercafunghi Toscana'],['Versione',VERSIONE||'n.d.'],['Ramo',RAMO||'n.d.'],
+    ['Giorno',DATE[gIdx]],['Selezione',SEL[selIdx].nome],
+    ['Ultimo giorno con pioggia misurata',ULTIMA_PIOGGIA],['Stazioni esportate',m.length-1],[],
+    ['Pioggia','SIR Regione Toscana, misurata, prevalidata'],
+    ['Suolo e aria','Open-Meteo, endpoint previsioni, modellati'],
+    ['Indice','0,45 termico + 0,40 idrico + 0,10 innesco + 0,05 stagionale, con sbarramento termico']];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(meta),'Info');
+  XLSX.writeFile(wb,'cercafunghi_'+(VERSIONE||'')+'_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.xlsx');
+};
+
+/* tabella specie nella documentazione */
+document.getElementById('tabspecie').innerHTML='<table><tr><th>Specie</th><th>Finestra T suolo</th>'
+ +'<th>Limiti esterni</th><th>Veto caldo<br>aria</th><th>Latenza</th><th>Mesi</th><th>Alberatura</th></tr>'
+ +SPECIE.map(s=>'<tr><td>'+s.nome+'<br><i style="font-weight:400;font-size:11px">'+s.lat+'</i></td>'
+   +'<td>'+s.ts[1]+'\u2013'+s.ts[2]+' \u00b0C</td><td>'+s.ts[0]+' / '+s.ts[3]+' \u00b0C</td>'
+   +'<td>'+(VETI_ATTIVI?('&gt; '+caldoSpecie(s)+' \u00b0C'):'\u2013')+'</td>'
+   +'<td>'+s.lag[0]+'\u2013'+s.lag[1]+' gg</td>'
+   +'<td>'+s.mesi.map(m=>MESIB[m]).join(' ')+'</td>'
+   +'<td style="font-weight:400">'+s.alberi+'</td></tr>').join('')+'</table>';
+
+document.getElementById('colophon').innerHTML=
+ 'Pioggia: Servizio Idrologico Regionale, Regione Toscana \u2014 sir.toscana.it \u00b7 dati prevalidati, ultimo giorno misurato '
+ +ULTIMA_PIOGGIA.split('-').reverse().join('/')+'.<br>'
+ +'Suolo, aria: Open-Meteo, endpoint delle previsioni \u2014 open-meteo.com \u00b7 uso non commerciale. '
+ +'Anche i giorni passati vengono da run precedenti dello stesso modello, non da rianalisi.<br>'
+ +'Coordinate stazioni: Open Data Regione Toscana, licenza CC BY-SA.<br>'
+ +'Boschi: Inventario Forestale della Toscana (volo 1978, rilievi a terra anni \u201990, griglia 400 m) '
+ +'e Uso e Copertura del Suolo 2019, WMS Geoscopio \u2014 Regione Toscana.<br>'
+ +'Sfondi: OpenTopoMap (CC-BY-SA), OpenStreetMap contributors (ODbL), Esri World Imagery.<br>'
+ +'Periodo coperto: '+DATE[0].split('-').reverse().join('/')+' \u2013 '+DATE[DATE.length-1].split('-').reverse().join('/')
+ +' \u00b7 '+ST.length+' stazioni \u00b7 elaborazione sperimentale.'+(AGGIORNATO?'<br>Dati ricostruiti il '+AGGIORNATO.split('-').reverse().join('/')+'.':'')+(VERSIONE?'<br>Versione <b>'+VERSIONE+'</b>'+(RAMO?', ramo '+RAMO:'')+'.':'');
+
+render(true);
+
+} /* fine avvia() */
+</script></body></html>
