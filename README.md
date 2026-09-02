@@ -26,9 +26,32 @@ in ogni uscita — pagina, CSV e Excel.
 | Ramo | Versione | Indirizzo | Cosa cambia |
 |---|---|---|---|
 | A1 | A1.1 | [/A1/](https://luca-cecchi-82.github.io/Cercafunghi/A1/) | indice a somma pesata |
-| A2 | A2.0 | [/A2/](https://luca-cecchi-82.github.io/Cercafunghi/A2/) | condizioni necessarie che azzerano l'indice |
+| A2 | A2.2 | [/A2/](https://luca-cecchi-82.github.io/Cercafunghi/A2/) | condizioni necessarie che azzerano l'indice |
+| A3 | A3.0 | [/A3/](https://luca-cecchi-82.github.io/Cercafunghi/A3/) | ondate di fruttificazione seguite nel tempo |
 
 La pagina alla radice elenca i rami e rimanda al corrente.
+
+Dalla versione A3 ogni cambio di versione ha una **release** su GitHub, che congela lo
+stato completo del progetto in quel momento, e una voce in [`CHANGELOG.md`](CHANGELOG.md)
+che spiega cosa è cambiato e perché.
+
+### Che cosa cambia da un ramo all'altro
+
+**A3 pone una domanda diversa dagli altri due.** A1 e A2 rispondono a *«oggi le
+condizioni sono favorevoli?»*: una fotografia del giorno scelto, senza memoria. A3
+risponde a *«oggi ci sono funghi maturi da raccogliere?»*, che è lo stato di un processo
+lungo settimane.
+
+A3 risale alle piogge dei 45 giorni precedenti, individua le ondate di fruttificazione e
+segue ciascuna nel suo ciclo: quanti giorni sono passati, quanto era grosso l'evento, e
+soprattutto **cosa è successo nel frattempo**. Se fra la pioggia e oggi ci sono stati
+giorni di caldo secco o di suolo asciutto, l'ondata è compromessa e resta compromessa
+anche se poi rinfresca.
+
+Oltre al punteggio, A3 dice **a che punto è**: attesa fra tot giorni, in corso da tot,
+in esaurimento, passata, con i giorni dall'evento sempre dichiarati.
+
+Il dettaglio è in [`CHANGELOG.md`](CHANGELOG.md) e nella pagina del ramo.
 
 ### Differenza fra A1 e A2
 
@@ -72,6 +95,8 @@ A1/index.html                    l'app
 A1/config.json                   versione e parametri del ramo
 A1/dati.json                     dati, ricostruiti automaticamente
 A2/…                             stesso schema
+A3/…                             stesso schema
+CHANGELOG.md                     registro delle versioni, dalla A3 in poi
 scripts/aggiorna_dati.py         scarica le sorgenti e monta i dati.json
 .github/workflows/aggiorna.yml   esegue lo script ogni notte
 ```
@@ -98,7 +123,7 @@ Si può anche lanciare a mano da **Actions → Aggiorna i dati → Run workflow*
 Per rifarlo sul proprio computer serve solo Python 3, senza installare niente:
 
 ```
-python scripts/aggiorna_dati.py A1 A2
+python scripts/aggiorna_dati.py A1 A2 A3
 ```
 
 Senza argomenti usa il ramo `A1`. Indicandone più di uno, le sorgenti vengono
@@ -117,11 +142,13 @@ leggeva come scarsità di pioggia invece che come assenza di dato.
 
 ## Aggiungere un ramo
 
-1. Copia la cartella del ramo di partenza, per esempio `A2` in `A3`
-2. In `A3/config.json` cambia `versione` e `ramo`
-3. In `.github/workflows/aggiorna.yml` scrivi `RAMI: "A1 A2 A3"`
+1. Copia la cartella del ramo di partenza, per esempio `A3` in `A4`
+2. In `A4/config.json` cambia `versione` e `ramo`
+3. In `.github/workflows/aggiorna.yml` aggiungi il ramo a `RAMI`
 4. Aggiungi la voce nella pagina `index.html` alla radice, e sposta lì il
    rimando automatico se il nuovo ramo diventa il corrente
+5. Aggiungi la voce in `CHANGELOG.md`
+6. Crea la release su GitHub con il tag della versione
 
 ## Fonti
 

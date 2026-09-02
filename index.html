@@ -38,13 +38,18 @@ button:hover{border-color:var(--inchiostro)}
 <hr>
 
 <div class="rami">
-  <a class="ramo corrente" href="A2/">
+  <a class="ramo corrente" href="A3/">
     <span class="tag">versione corrente</span>
+    <b>A3 &mdash; ondate di fruttificazione</b>
+    <span>Non dice se oggi le condizioni sono buone, ma se oggi ci sono funghi maturi. Parte dalle piogge, segue ogni fruttificazione nel suo ciclo e stima quanta ne &egrave; sopravvissuta. Indica anche <i>fra quanto</i> o <i>da quanto</i>.</span>
+  </a>
+  <a class="ramo" href="A2/">
+    <span class="tag">versione precedente</span>
     <b>A2 &mdash; con condizioni necessarie</b>
     <span>Come A1, ma alcune condizioni azzerano l&rsquo;indice invece di limitarsi ad abbassarlo: aria fuori dalla finestra utile, caldo senza pioggia, siccit&agrave; prolungata. Soglie larghe e dichiarate.</span>
   </a>
   <a class="ramo" href="A1/">
-    <span class="tag">versione precedente</span>
+    <span class="tag">prima versione</span>
     <b>A1 &mdash; impianto a stazioni</b>
     <span>376 pluviometri del SIR, temperatura e umidit&agrave; del suolo modellate da Open-Meteo. Indice a somma pesata, senza azzeramenti. Resta qui per il confronto.</span>
   </a>
@@ -75,7 +80,7 @@ var conto = setInterval(function(){
   document.getElementById('secondi').textContent = resta;
   /* ramo a cui rimandare: cambia SOLO questa riga per spostare
      il rimando automatico su un altro ramo */
-  if(resta <= 0){ clearInterval(conto); location.replace('A2/'); }
+  if(resta <= 0){ clearInterval(conto); location.replace('A3/'); }
 }, 1000);
 document.getElementById('ferma').onclick = function(){
   salta = true; clearInterval(conto);
