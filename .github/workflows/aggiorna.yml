@@ -13,7 +13,7 @@ permissions:
 env:
   # Rami da ricostruire, separati da spazio. Per aggiungerne uno
   # basta creare la sua cartella con config.json e scriverlo qui.
-  RAMI: "A1"
+  RAMI: "A1 A2"
 
 jobs:
   aggiorna:
@@ -44,3 +44,4 @@ jobs:
             git commit -m "Dati aggiornati al $(date +'%d/%m/%Y') - rami: $RAMI"
             git push
           fi
+          
