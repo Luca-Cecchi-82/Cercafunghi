@@ -8,6 +8,48 @@ momento: [Releases](https://github.com/luca-cecchi-82/Cercafunghi/releases).
 
 ---
 
+## A3.1 — 3 settembre 2026
+
+Nessun cambiamento al calcolo: l'indice di A3.0 e quello di A3.1 sono identici. Cambia
+solo come viene spiegato.
+
+### Perché
+
+In A3.0 la scheda diceva *«compromessa: 2 giorni sfavorevoli, ne resta il 56%»*. È
+un'informazione corretta ma opaca: non si capisce quando è arrivato il danno, in quale
+fase del ciclo, né perché due specie sullo stesso punto abbiano punteggi molto diversi.
+
+### La scheda dell'ondata
+
+Ogni specie ha ora una scheda che si legge da sola, senza rimandi alle altre.
+
+In cima una **barra del ciclo** in caratteri a larghezza fissa, un carattere per giorno:
+
+```
+22ago               1set                11set
+●───────────────✗─✗─██▼█████████████████┤ ········
+0         5         10        15        20
+```
+
+Sopra le date del calendario, sotto i giorni trascorsi dalla pioggia, ogni cinque. Il
+tratto è il periodo in cui i funghi crescono sotto terra, il pieno quando sono
+raccoglibili. Le ✗ mostrano **dove** è caduto il danno: nell'esempio al nono e decimo
+giorno, cioè a ridosso della nascita, che è il momento peggiore.
+
+Sotto i 500 pixel la barra passa da due colonne per giorno a una.
+
+Segue un testo generato dai dati veri della stazione e dalle soglie della specie: quanta
+pioggia è caduta e quando, quando sono usciti o usciranno i carpofori, quali giorni
+hanno fatto danno e in quale fase, perché quel danno non si recupera, e quanto resta.
+
+### Cosa cambia nella lettura
+
+Due specie sulla stessa stazione possono avere punteggi molto diversi, e ora la ragione
+è leggibile: soglie di sofferenza diverse, cicli di lunghezza diversa, e quindi giorni
+di danno che cadono in fasi diverse. Prima sembrava che il modello facesse i capricci.
+
+---
+
 ## A3.0 — 2 settembre 2026
 
 Primo ramo che risponde a una domanda diversa: non *«oggi le condizioni sono

@@ -27,7 +27,7 @@ in ogni uscita — pagina, CSV e Excel.
 |---|---|---|---|
 | A1 | A1.1 | [/A1/](https://luca-cecchi-82.github.io/Cercafunghi/A1/) | indice a somma pesata |
 | A2 | A2.2 | [/A2/](https://luca-cecchi-82.github.io/Cercafunghi/A2/) | condizioni necessarie che azzerano l'indice |
-| A3 | A3.0 | [/A3/](https://luca-cecchi-82.github.io/Cercafunghi/A3/) | ondate di fruttificazione seguite nel tempo |
+| A3 | A3.1 | [/A3/](https://luca-cecchi-82.github.io/Cercafunghi/A3/) | ondate di fruttificazione seguite nel tempo |
 
 La pagina alla radice elenca i rami e rimanda al corrente.
 
