@@ -95,7 +95,8 @@ svg.g{display:block;width:100%;height:auto;overflow:visible}
 .ptlab{font-size:9.5px;fill:var(--inchiostro);pointer-events:none;font-weight:500}
 
 /* tabella */
-.tab-scroll{overflow:auto;border:1.5px solid var(--inchiostro);background:var(--carta2);max-height:540px}
+.tab-scroll{overflow:auto;border:1.5px solid var(--inchiostro);background:var(--carta2);
+ max-height:min(82vh,1000px);resize:vertical}
 table{border-collapse:collapse;width:100%;font-size:12px;min-width:1080px}
 th{background:var(--inchiostro);color:var(--carta);font-weight:500;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:7px 8px;text-align:right;cursor:pointer;white-space:nowrap;position:sticky;top:0;z-index:2}
 th:first-child,th:nth-child(2){text-align:left}
@@ -206,6 +207,11 @@ th.statoh{min-width:58px;max-width:90px;white-space:normal}
 /* una colonna per specie con la scheda dell'ondata */
 td.schedac{text-align:left;white-space:normal;font-size:10px;line-height:1.35;
  min-width:170px;max-width:230px;vertical-align:top;padding:5px 6px}
+/* il racconto e' lungo: la cella non deve far crescere la riga senza
+   limite, altrimenti nella tabella ci sta una riga sola. Si scorre
+   dentro la cella, e la scheda completa resta a portata cliccando
+   la stazione. */
+td.schedac .sc-testo{padding-right:2px}
 th.schedah{min-width:170px;max-width:230px;white-space:normal}
 td.schedac .sc-barra{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;
  line-height:1.15;white-space:pre;margin:2px 0 4px;overflow-x:auto}
@@ -214,6 +220,15 @@ td.schedac .sc-tit{font-weight:600;color:var(--accento);font-size:9.5px;
 td.schedac p{margin:4px 0 0}
 td.schedac p b{color:var(--accento);font-weight:600}
 td.schedac .sc-vuoto{color:#5E5646;font-style:italic}
+details.sc-det>summary{cursor:pointer;font-size:10px;color:var(--accento);
+ list-style:none;padding:2px 0}
+details.sc-det>summary::-webkit-details-marker{display:none}
+details.sc-det>summary::before{content:"\25B8 "}
+details.sc-det[open]>summary::before{content:"\25BE "}
+.sc-corpo{max-height:420px;overflow-y:auto;padding-right:5px;margin-top:4px}
+.sc-una{border-top:1px solid var(--curva);padding-top:6px;margin-top:6px}
+.sc-una:first-child{border-top:0;margin-top:0;padding-top:0}
+.sc-nome{font-family:'Zilla Slab',serif;font-size:11.5px;font-weight:600}
 td.nome,th.nomeh{max-width:150px;white-space:normal}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:640px){.wrap{padding:18px 12px 55px}.ptlab{display:none}#map{height:62vh}.dataval{font-size:18px;min-width:130px}}
@@ -1119,8 +1134,41 @@ function cellaScheda(st,sp){
   let s='<div class="sc-tit">'+dataBreve(o.data)+' \u00b7 '+mm+' mm</div>';
   if(o.sv) s+='<div class="sc-barra">'+escapeHtml(barraCompatta(o,sp,2))+'</div>';
   s+='<div style="font-size:9.5px;color:#5E5646">'+o.stato.t+'</div>';
-  if(o.sv) s+=raccontoOndata(o,sp,st,gIdx).replace(/class="racconto"/g,'');
+  if(o.sv) s+='<div class="sc-testo">'
+             +raccontoOndata(o,sp,st,gIdx).replace(/class="racconto"/g,'')
+             +'</div>';
   return s;
+}
+
+/* Tutte le schede di una stazione, una sotto l'altra.
+   Costruita solo quando l'utente apre il pieghevole: generarla per tutte
+   le stazioni a ogni ridisegno significherebbe migliaia di racconti e il
+   browser si ferma. */
+function schedeStazione(st){
+  return SPECIE.map(function(sp){
+    return '<div class="sc-una"><div class="sc-nome">'+sp.nome+'</div>'
+         + cellaScheda(st,sp)+'</div>';
+  }).join('');
+}
+
+/* Un solo ascoltatore per tutta la tabella, in fase di cattura:
+   al primo click riempie il pieghevole, e in ogni caso impedisce che il
+   click apra anche la scheda della stazione. */
+function attivaSchede(){
+  const tb=document.getElementById('tb');
+  if(!tb || tb.dataset.schede) return;
+  tb.dataset.schede='1';
+  tb.addEventListener('click', function(e){
+    const t=e.target;
+    const d=(t && t.closest) ? t.closest('details.sc-det') : null;
+    if(!d) return;
+    e.stopPropagation();
+    if(d.dataset.fatto) return;
+    const st=(ST||[]).find(function(x){ return x.c===d.dataset.st; });
+    if(!st) return;
+    d.dataset.fatto='1';
+    d.querySelector('.sc-corpo').innerHTML=schedeStazione(st);
+  }, true);
 }
 
 /* Versione senza formattazione, per CSV ed Excel. */
@@ -1718,10 +1766,9 @@ function colonne(){
   c.push(['stato','Stato ondata','statoh'],['ondata','Ondata del','testoh'],
          ['ond_mm','Pioggia ondata','mm'],['resta','Sopravvissuto','%'],
          ['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
-  /* una colonna per specie con la scheda dell'ondata, dopo il versante */
-  SPECIE.forEach(function(sp){
-    c.push(['sch_'+sp.id, sp.nome.split(',')[0], 'schedah']);
-  });
+  /* una sola colonna con tutte le schede, chiusa: si apre a richiesta.
+     Sette colonne di testo rendevano la tabella illeggibile e pesante. */
+  c.push(['schede','Schede specie','schedah']);
   [['ts','T suolo<br>7\u201328<br>\u00b0C'],['ts0','T suolo<br>0\u20137<br>\u00b0C'],
    ['sm','Umidit\u00e0<br>7\u201328<br>m\u00b3/m\u00b3'],['sm0','Umidit\u00e0<br>0\u20137<br>m\u00b3/m\u00b3'],
    ['pio','Pioggia<br>del gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
@@ -1747,7 +1794,10 @@ function valori(st){
     p7:st.p7[i],p15:st.p15[i],p30:st.p30[i],ant:ant,gi:va.gi,T:va.T,I:va.I,
     ta:st.ta[i],tmn:st.tmn[i],tmx:st.tmx[i]};
   SPECIE.forEach(sp=>{ o['sp_'+sp.id]=vt.sp[sp.id].tot; });
-  SPECIE.forEach(sp=>{ o['sch_'+sp.id]=testoScheda(st,sp); });
+  /* le schede NON si generano qui: sarebbero 376 x 7 racconti a ogni
+     ridisegno della tabella e il browser si ferma. In tabella vengono
+     riempite solo le righe che entrano in vista; nell'export le
+     costruisce matrice(), una volta sola al momento dello scarico. */
   return o;
 }
 function cell(v,k){ if(v===null||v===undefined) return '\u2013';
@@ -1834,13 +1884,14 @@ function render(fit){
         r+='<td class="idxc"><span class="idx" style="background:'+colore(v[k])+'">'+(v[k]===null?'\u2013':v[k])+'</span></td>';
       else if(k==='alberi'||k==='vers') r+='<td class="testo">'+v[k]+'</td>';
       else if(k==='stato') r+='<td class="statoc">'+v[k]+'</td>';
-      else if(k.indexOf('sch_')===0){
-        const sp=SPECIE.find(function(x){ return x.id===k.slice(4); });
-        r+='<td class="schedac">'+cellaScheda(s,sp)+'</td>';
-      }
+      else if(k==='schede')
+        r+='<td class="schedac"><details class="sc-det" data-st="'+s.c+'">'
+          +'<summary>schede delle specie</summary><div class="sc-corpo"></div>'
+          +'</details></td>';
       else r+='<td class="num">'+cell(v[k],k)+'</td>';
     });
     return r+'</tr>'; }).join('');
+  attivaSchede();
 
   if(fit&&L_.length) map.fitBounds(L.latLngBounds(L_.map(s=>[s.lat,s.lon])),{padding:[26,26]});
 }
@@ -1853,19 +1904,41 @@ function matrice(){
   const righe=[int];
   L_.map(s=>({s,v:valori(s)})).sort((a,b)=>(b.v.tot||0)-(a.v.tot||0)).forEach(({s,v})=>{
     righe.push([s.c,s.n,s.m,s.p,s.a,s.q,s.lat,s.lon,DATE[gIdx]]
-      .concat(COLS.slice(3).map(c=>{ const x=v[c[0]]; return x===null||x===undefined?'':x; })));
+      .concat(COLS.slice(3).map(c=>{
+        if(c[0]==='schede') return SPECIE.map(function(sp){
+          return sp.nome+': '+testoScheda(s,sp);
+        }).join('\n');
+        const x=v[c[0]]; return x===null||x===undefined?'':x; })));
   });
   return righe;
 }
+/* Un campo che contiene punti e virgola, virgolette o a capo va
+   racchiuso fra virgolette, altrimenti le colonne si sfasano. Le
+   schede delle specie contengono tutte e tre le cose. */
+function campoCsv(x){
+  const s=(x===null||x===undefined)?'':String(x);
+  return /[;"\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
 document.getElementById('csv').onclick=()=>{
-  const b=new Blob(['\ufeff'+matrice().map(r=>r.join(';')).join('\n')],{type:'text/csv;charset=utf-8'});
+  const b=new Blob(['\ufeff'+matrice().map(r=>r.map(campoCsv).join(';')).join('\r\n')],
+                   {type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(b);
   a.download='cercafunghi_'+(VERSIONE||'')+'_'+SEL[selIdx].id+'_'+DATE[gIdx]+'.csv'; a.click();
 };
 document.getElementById('xlsx').onclick=()=>{
   if(typeof XLSX==='undefined'){ alert('Libreria Excel non caricata: uso il CSV.'); document.getElementById('csv').click(); return; }
   const m=matrice(), ws=XLSX.utils.aoa_to_sheet(m);
-  ws['!cols']=m[0].map((h,j)=>({wch: j===1?24 : (h==='Dove cercare')?42 : (h==='Versante consigliato')?60 : Math.max(8,Math.min(16,String(h).length+2))}));
+  ws['!cols']=m[0].map((h,j)=>({wch: j===1?24 : (h==='Dove cercare')?42
+    : (h==='Versante consigliato')?60 : (h==='Schede specie')?90
+    : Math.max(8,Math.min(16,String(h).length+2))}));
+  /* la colonna delle schede contiene piu' capoversi: va mandata a capo */
+  const jSch=m[0].indexOf('Schede specie');
+  if(jSch>=0){
+    for(let r=1;r<m.length;r++){
+      const cel=ws[XLSX.utils.encode_cell({r:r,c:jSch})];
+      if(cel){ cel.s=Object.assign({},cel.s,{alignment:{wrapText:true,vertical:'top'}}); }
+    }
+  }
   ws['!freeze']={xSplit:2,ySplit:1};
   ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:m.length-1,c:m[0].length-1}})};
   const wb=XLSX.utils.book_new();
