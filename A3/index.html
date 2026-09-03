@@ -135,6 +135,20 @@ summary{cursor:pointer;font-family:'Zilla Slab',serif;font-size:15px;font-weight
 .sc-fondo.trascino{cursor:grabbing}
 .cerca-box{border:1px solid var(--curva);background:rgba(232,225,209,.6);padding:7px 9px;margin:7px 0}
 .cerca-box b{font-family:'Zilla Slab',serif}
+.ond-tit{font-family:'Zilla Slab',serif;font-size:13px;font-weight:600;margin-top:9px;
+ padding-top:8px;border-top:1px solid var(--curva);letter-spacing:.01em}
+.ond-sot{font-size:12px;color:#4A4335;margin-bottom:8px}
+.ond-barra{overflow-x:auto;margin:6px 0}
+.ond-barra pre{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;
+ line-height:1.25;margin:0;white-space:pre;color:var(--inchiostro)}
+.ond-leg{font-size:10.5px;color:#5E5646;line-height:1.5;margin-bottom:7px}
+.ond-altre{font-size:11px;color:#5E5646;font-style:italic;margin-top:6px}
+p.racconto{font-size:12px;line-height:1.5;margin:7px 0 0;color:#3A342A}
+p.racconto b{font-family:inherit;font-weight:600;color:var(--accento)}
+@media(max-width:500px){
+  .ond-barra pre{font-size:11px}
+  .ond-leg{font-size:10px}
+}
 .vers{font-size:11.5px;line-height:1.45;margin-top:3px}
 .altre{margin-top:4px}
 .altre div{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:1px 0}
@@ -792,16 +806,19 @@ function giornoCattivo(st,j,sp){
    gia' e si rovina piu' lentamente. */
 function sopravvivenza(st,i,ev,sp){
   const nascita=ev.g-sp.lag[0];   /* eta' in "giorni fa" del momento della nascita */
-  let s=1, cattivi=0, ultimo=null;
+  let s=1;
+  const danni=[];                 /* serve alla scheda per raccontare cos'e' successo */
   for(let k=ev.g;k>=0;k--){
     const j=i-k;
     if(j<0) continue;
     const motivo=giornoCattivo(st,j,sp);
     if(!motivo) continue;
-    cattivi++; ultimo=motivo;
-    s*=(1-(k>nascita?PERDITA_SVIL:PERDITA_RACC));
+    const prima = k>nascita;
+    danni.push({eta:ev.g-k, data:DATE[j], motivo:motivo, sottoTerra:prima});
+    s*=(1-(prima?PERDITA_SVIL:PERDITA_RACC));
   }
-  return {s:s, cattivi:cattivi, motivo:ultimo};
+  return {s:s, cattivi:danni.length, motivo:danni.length?danni[danni.length-1].motivo:null,
+          danni:danni};
 }
 
 /* Come si chiama lo stato di un'ondata, per l'utente.
@@ -812,6 +829,104 @@ function statoOndata(g,sp){
   if(g<=b) return {t:'in corso da '+(g-a)+' giorni ('+g+' dall\u2019evento)', f:'corso'};
   if(g<c) return {t:'in esaurimento ('+g+' giorni dall\u2019evento)', f:'coda'};
   return {t:'passata ('+g+' giorni dall\u2019evento)', f:'passata'};
+}
+
+/* ------------- scheda narrata dell'ondata -------------
+   La barra e il testo sotto sono generati dai dati veri della
+   stazione e della specie: ogni scheda si legge da sola, senza
+   rimandi alle altre specie. */
+
+const MESI_BR=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function dataBreve(iso){
+  if(!iso) return '';
+  const p=iso.split('-');
+  return (+p[2])+MESI_BR[(+p[1])-1];
+}
+/* la data che si ottiene spostandosi di n giorni da una data ISO */
+function dataPiu(iso,n){
+  const d=new Date(iso+'T12:00:00');
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+/* "1 giorno" ma "3 giorni" */
+function gg(n){ return n+(n===1?' giorno':' giorni'); }
+/* "al 7 settembre", "all'11 settembre", "al 1\u00b0 settembre" */
+function alData(iso){
+  const g=+iso.split('-')[2];
+  if(g===8||g===11) return 'all\u2019'+dataEstesa(iso);
+  return 'al '+dataEstesa(iso);
+}
+/* davanti a 8 e 11 l'articolo plurale si elide */
+function neiGiorni(n){ return ((n===8||n===11)?'Negli ':'Nei ')+gg(n); }
+/* elenco di date nello stesso mese: "il 30 e il 31 agosto" */
+function elencaDate(a){
+  if(!a.length) return '';
+  const mesi={}, ordine=[];
+  a.forEach(function(x){
+    const p=x.data.split('-'), m=p[1];
+    if(!mesi[m]){ mesi[m]=[]; ordine.push(m); }
+    mesi[m].push(+p[2]);
+  });
+  return ordine.map(function(m){
+    const g=mesi[m];
+    const t=(g.length===1)?('il '+g[0])
+          :('il '+g.slice(0,-1).join(', il ')+' e il '+g[g.length-1]);
+    return t+' '+MESI_LUNGHI[(+m)-1];
+  }).join(', ');
+}
+const MESI_LUNGHI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio',
+  'agosto','settembre','ottobre','novembre','dicembre'];
+
+function dataEstesa(iso){
+  const p=iso.split('-'), g=+p[2];
+  return (g===1?'1\u00b0':String(g))+'\u00A0'+MESI_LUNGHI[(+p[1])-1];
+}
+
+/* Barra del ciclo: una o due colonne per giorno secondo lo spazio.
+   Ogni cella e' un giorno dall'evento. */
+function barraOndata(o,sp,passo){
+  const fine=sp.lag[1]+CODA_GG;
+  const lung=Math.max(o.g,fine)+1;
+  const danno={};
+  (o.sv.danni||[]).forEach(function(d){ danno[d.eta]=true; });
+
+  let barra='', scala='', sopra='';
+  const tappe={};
+  tappe[0]='pioggia'; tappe[sp.lag[0]]='nascita'; tappe[o.g]='oggi'; tappe[sp.lag[1]]='fine';
+  const dateTappe={};
+  dateTappe[0]=dataBreve(o.data);
+  dateTappe[sp.lag[0]]=dataBreve(dataPiu(o.data,sp.lag[0]));
+  dateTappe[sp.lag[1]]=dataBreve(dataPiu(o.data,sp.lag[1]));
+
+  for(let g=0;g<lung;g++){
+    /* sfondo della fase in cui cade il giorno: serve a riempire la
+       seconda colonna quando un simbolo occupa la prima, cosi' la
+       barra resta continua invece di bucarsi */
+    let sfondo;
+    if(g<sp.lag[0]) sfondo='\u2500';
+    else if(g<=sp.lag[1]) sfondo='\u2588';
+    else sfondo='\u00B7';
+
+    let c;
+    if(g===0) c='\u25CF';
+    else if(danno[g]) c='\u2717';
+    else if(g===o.g) c='\u25BC';
+    else if(g===sp.lag[1]) c='\u2524';
+    else c=sfondo;
+    barra += c + (passo===2?(g===sp.lag[1]?' ':sfondo):'');
+
+    /* scala dei giorni trascorsi, ogni 5 */
+    const eti = (g%5===0)? String(g) : '';
+    scala = riempi(scala, g*passo, eti);
+    sopra = riempi(sopra, g*passo, dateTappe[g]||'');
+  }
+  return {barra:barra, scala:scala, sopra:sopra, lung:lung*passo};
+}
+/* scrive txt a partire dalla colonna pos, allungando la riga con spazi */
+function riempi(riga,pos,txt){
+  if(!txt) return riga;
+  while(riga.length<pos) riga+=' ';
+  return riga.slice(0,pos)+txt;
 }
 
 function valuta(st,i,sp){
@@ -860,6 +975,93 @@ function valuta(st,i,sp){
           N:0, S:0, gi:(ev.length?ev[0].g:null), tot:tot,
           ondata:principale, quante:vive.length};
 }
+/* Il racconto: cosa e' successo, perche' il punteggio e' quello.
+   Tutto ricavato dai dati della stazione e dalle soglie della specie. */
+function raccontoOndata(o,sp,st,i){
+  const p=[];
+  const mm=Math.round(o.mm);
+
+  /* primo capoverso: l'innesco e il ciclo */
+  let t='<b>Cosa \u00e8 successo.</b> Il '+dataEstesa(o.data)+' sono caduti '+mm+
+        '\u00A0mm di pioggia in '+EVENTO_GG+' giorni';
+  t += (mm>=AMPIEZZA_MAX)
+       ? ', una quantit\u00e0 abbondante, ben oltre i '+AMPIEZZA_MIN+
+         '\u00A0mm che servono per far partire una fruttificazione. '
+       : (mm>=AMPIEZZA_MIN*2
+          ? ', abbastanza per innescare una fruttificazione. '
+          : ', appena sopra i '+AMPIEZZA_MIN+'\u00A0mm minimi: l\u2019innesco c\u2019\u00e8 stato, ma debole. ');
+  const gia = o.g>=sp.lag[0];
+  t += 'Il '+sp.nome.split(',')[0].toLowerCase()+' impiega circa '+gg(sp.lag[0])+
+       ' prima che i carpofori spuntino, quindi '+
+       (gia?'sono usciti intorno ':'usciranno intorno ')+
+       alData(dataPiu(o.data,sp.lag[0]))+' e '+
+       (gia?'restano':'resteranno')+' di misura buona fino '+
+       alData(dataPiu(o.data,sp.lag[1]))+'.';
+  p.push(t);
+
+  /* secondo capoverso: i danni, o la loro assenza */
+  const d=o.sv.danni||[];
+  const nato=o.g>=sp.lag[0];
+  if(!d.length){
+    p.push('<b>'+(nato?'Perch\u00e9 il punteggio \u00e8 alto.':'Come sta andando.')+'</b> '+
+      neiGiorni(o.g)+' trascorsi dalla pioggia non ci sono stati giorni sfavorevoli '+
+      'per questa specie: la fruttificazione '+
+      (nato?'\u00e8 arrivata fin qui intatta.':'sta maturando senza intoppi.'));
+  } else {
+    const sotto=d.filter(function(x){ return x.sottoTerra; });
+    const fuori=d.filter(function(x){ return !x.sottoTerra; });
+    const elenca=elencaDate;
+    let t2='<b>'+(nato?'Perch\u00e9 il punteggio non \u00e8 pieno.'
+                       :'Cosa \u00e8 andato storto.')+'</b> ';
+    if(sotto.length){
+      t2 += (sotto.length===1?'Il giorno sfavorevole (':'Nei giorni sfavorevoli (')+
+            elenca(sotto)+') i funghi erano ancora sotto terra, '+
+            'nella fase in cui sono pi\u00f9 fragili: '+spiegaMotivo(sotto[0].motivo,sp)+
+            ' Una parte dei primordi si \u00e8 persa prima di riuscire a uscire, e quella perdita '+
+            'non si recupera: anche se le condizioni migliorano, i primordi persi non ricrescono. ';
+    }
+    if(fuori.length){
+      t2 += (sotto.length?'Poi, ':'')+'a funghi gi\u00e0 usciti ('+elenca(fuori)+') '+
+            spiegaMotivo(fuori[0].motivo,sp)+
+            ' I carpofori gi\u00e0 formati non spariscono, ma si seccano e restano stentati. ';
+    }
+    t2 += 'Si stima che sia sopravvissuto il '+Math.round(o.sv.s*100)+
+          '% di quello che poteva esserci.';
+    p.push(t2);
+  }
+
+  /* terzo capoverso: dove siamo adesso */
+  const ultimaPioggia=o.g;
+  let t3='<b>Dove siamo adesso.</b> ';
+  if(o.g<sp.lag[0]){
+    t3 += 'I funghi non sono ancora usciti: manca'+((sp.lag[0]-o.g)===1?'':'no')+' '+
+          gg(sp.lag[0]-o.g)+' alla nascita, prevista intorno '+
+          alData(dataPiu(o.data,sp.lag[0]))+'.';
+  } else if(o.g<=sp.lag[1]){
+    t3 += 'Sono fuori da '+gg(o.g-sp.lag[0])+' e restano raccoglibili fino '+
+          alData(dataPiu(o.data,sp.lag[1]))+', poi calano. Sono passati '+
+          gg(ultimaPioggia)+' dalla pioggia che li ha fatti partire: '+
+          'non ne nasceranno altri finch\u00e9 non torna a piovere.';
+  } else {
+    t3 += 'La finestra si \u00e8 chiusa '+alData(dataPiu(o.data,sp.lag[1]))+
+          ': quello che resta \u00e8 in esaurimento, e cala di giorno in giorno.';
+  }
+  p.push(t3);
+
+  return p.map(function(x){ return '<p class="racconto">'+x+'</p>'; }).join('');
+}
+
+function spiegaMotivo(m,sp){
+  if(m==='caldo senza pioggia')
+    return 'l\u2019aria \u00e8 stata sopra i '+caldoSpecie(sp)+
+           '\u00A0gradi di media senza che cadesse pioggia.';
+  if(m==='suolo secco')
+    return 'l\u2019umidit\u00e0 del suolo \u00e8 scesa sotto '+SUOLO_SECCO+
+           ', cio\u00e8 sotto il minimo che serve al carpoforo.';
+  return 'la temperatura del suolo \u00e8 uscita dai limiti che questa specie tollera ('+
+         sp.ts[0]+'\u2013'+sp.ts[3]+'\u00A0\u00B0C).';
+}
+
 function valutaTutto(st,i){
   const r={sp:{}};
   SPECIE.forEach(sp=>{ r.sp[sp.id]=valuta(st,i,sp); });
@@ -1225,22 +1427,51 @@ function riga(et,val){ return '<div class="pp-r"><span>'+et+'</span><b>'+val+'</
 
 function blocco(st,sp,primo){
   const v=V(st).sp[sp.id];
+  const o=v.ondata;
+  let dentro='';
+
+  if(o && o.sv){
+    const stretto = window.innerWidth < 500;
+    const b=barraOndata(o,sp,stretto?1:2);
+    const mm=Math.round(o.mm);
+    dentro =
+      '<div class="ond-tit">ONDATA DEL '+dataEstesa(o.data).toUpperCase()+
+      ' \u2014 '+mm+'\u00A0mm di pioggia in '+EVENTO_GG+' giorni</div>'
+     +'<div class="ond-sot">'+o.stato.t.charAt(0).toUpperCase()+o.stato.t.slice(1)
+     +(o.sv.cattivi?'. Ne resta il '+Math.round(o.sv.s*100)+'%.':'. Arrivata intatta.')+'</div>'
+     +'<div class="ond-barra"><pre>'
+       +escapeHtml(b.sopra)+'\n'+escapeHtml(b.barra)+'\n'+escapeHtml(b.scala)
+     +'</pre></div>'
+     +'<div class="ond-leg">'
+       +'\u25CF pioggia d\u2019innesco &nbsp; \u2500 sotto terra &nbsp; \u2588 raccoglibili<br>'
+       +'\u2717 giorno di danno &nbsp; \u25BC oggi &nbsp; \u2524 fine buttata'
+     +'</div>'
+     +raccontoOndata(o,sp,st,gIdx);
+  } else if(o){
+    dentro = '<div class="ond-tit">ONDATA DEL '+dataEstesa(o.data).toUpperCase()+'</div>'
+     +'<div class="ond-sot">'+o.stato.t+'</div>';
+  } else {
+    dentro = '<div class="ond-tit" style="color:#5E5646">NESSUN INNESCO</div>'
+     +'<p class="racconto">Negli ultimi '+FINESTRA_GG+' giorni non \u00e8 caduta una pioggia '
+     +'sufficiente a far partire una fruttificazione: servono almeno '+AMPIEZZA_MIN
+     +'\u00A0mm in '+EVENTO_GG+' giorni. Finch\u00e9 non piove, qui non nascono funghi '
+     +'per quanto le altre condizioni siano buone.</p>';
+  }
+
+  const altre = (v.quante>1)
+    ? '<div class="ond-altre">Altre '+(v.quante-1)+' ondate ancora attive contribuiscono al punteggio.</div>'
+    : '';
+
   return '<div class="cerca-box"'+(primo?' style="border-color:#8C2F16;border-width:2px"':'')+'>'
    +'<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">'
    +'<b>'+sp.nome+'</b><span class="idx" style="background:'+colore(v.tot)+'">'+(v.tot===null?'\u2013':v.tot)+'</span></div>'
    +'<div class="vers"><b>Dove cercare:</b> '+sp.alberi+'</div>'
    +'<div class="vers"><b>Versante:</b> '+versante(st,gIdx,sp)+'</div>'
-   +(v.ondata
-      ?'<div class="vers"><b>Ondata:</b> '+v.ondata.data+' \u2014 '+v.ondata.stato.t
-        +' \u00b7 '+Math.round(v.ondata.mm)+' mm'
-        +(v.quante>1?' \u00b7 altre '+(v.quante-1)+' in corso':'')+'</div>'
-       +(v.ondata.sv&&v.ondata.sv.cattivi
-          ?'<div class="vers" style="color:#8C2F16"><b>Compromessa:</b> '
-           +v.ondata.sv.cattivi+' giorni sfavorevoli ('+v.ondata.sv.motivo+'), '
-           +'ne resta il '+Math.round(v.ondata.sv.s*100)+'%</div>':'')
-      :'<div class="vers" style="color:#8C2F16"><b>Nessun innesco</b> negli ultimi '
-       +FINESTRA_GG+' giorni</div>')
+   + dentro + altre
    +'</div>';
+}
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function scheda(st){
