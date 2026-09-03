@@ -199,6 +199,21 @@ td.idxc{width:44px;text-align:center;padding:4px 3px}
 .idx{min-width:26px;padding:1px 4px;font-size:11.5px}
 td.testo{text-align:left;white-space:normal;font-size:10.5px;line-height:1.35;min-width:170px;max-width:270px}
 th.testoh{min-width:170px}
+/* lo stato dell'ondata sta in un terzo dello spazio, andando a capo */
+td.statoc{text-align:left;white-space:normal;font-size:10.5px;line-height:1.3;
+ min-width:58px;max-width:90px}
+th.statoh{min-width:58px;max-width:90px;white-space:normal}
+/* una colonna per specie con la scheda dell'ondata */
+td.schedac{text-align:left;white-space:normal;font-size:10px;line-height:1.35;
+ min-width:170px;max-width:230px;vertical-align:top;padding:5px 6px}
+th.schedah{min-width:170px;max-width:230px;white-space:normal}
+td.schedac .sc-barra{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;
+ line-height:1.15;white-space:pre;margin:2px 0 4px;overflow-x:auto}
+td.schedac .sc-tit{font-weight:600;color:var(--accento);font-size:9.5px;
+ letter-spacing:.04em;text-transform:uppercase}
+td.schedac p{margin:4px 0 0}
+td.schedac p b{color:var(--accento);font-weight:600}
+td.schedac .sc-vuoto{color:#5E5646;font-style:italic}
 td.nome,th.nomeh{max-width:150px;white-space:normal}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:640px){.wrap{padding:18px 12px 55px}.ptlab{display:none}#map{height:62vh}.dataval{font-size:18px;min-width:130px}}
@@ -825,10 +840,11 @@ function sopravvivenza(st,i,ev,sp){
    I giorni dall'evento sono sempre dichiarati. */
 function statoOndata(g,sp){
   const a=sp.lag[0], b=sp.lag[1], c=b+CODA_GG;
-  if(g<a) return {t:'attesa fra '+(a-g)+' giorni ('+g+' dall\u2019evento)', f:'attesa'};
-  if(g<=b) return {t:'in corso da '+(g-a)+' giorni ('+g+' dall\u2019evento)', f:'corso'};
-  if(g<c) return {t:'in esaurimento ('+g+' giorni dall\u2019evento)', f:'coda'};
-  return {t:'passata ('+g+' giorni dall\u2019evento)', f:'passata'};
+  const dall=' ('+gg(g)+' dall\u2019evento)';
+  if(g<a)  return {t:'attesa fra '+gg(a-g)+dall, f:'attesa'};
+  if(g<=b) return {t:(g===a?'appena usciti':'in corso da '+gg(g-a))+dall, f:'corso'};
+  if(g<c)  return {t:'in esaurimento'+dall, f:'coda'};
+  return {t:'passata'+dall, f:'passata'};
 }
 
 /* ------------- scheda narrata dell'ondata -------------
@@ -922,6 +938,37 @@ function barraOndata(o,sp,passo){
   }
   return {barra:barra, scala:scala, sopra:sopra, lung:lung*passo};
 }
+/* Barra ristretta per la cella di tabella: ogni carattere vale piu' giorni.
+   Fra i giorni raggruppati vince il simbolo piu' importante, cosi' un giorno
+   di danno non sparisce nella compressione. */
+function barraCompatta(o,sp,perCar){
+  const fine=sp.lag[1]+CODA_GG;
+  const lung=Math.max(o.g,fine)+1;
+  const danno={};
+  (o.sv.danni||[]).forEach(function(d){ danno[d.eta]=true; });
+
+  let barra='';
+  for(let g=0;g<lung;g+=perCar){
+    let c=null;
+    for(let x=g;x<Math.min(g+perCar,lung);x++){
+      let q;
+      if(x===0) q='\u25CF';
+      else if(danno[x]) q='\u2717';
+      else if(x===o.g) q='\u25BC';
+      else if(x===sp.lag[1]) q='\u2524';
+      else if(x<sp.lag[0]) q='\u2500';
+      else if(x<=sp.lag[1]) q='\u2588';
+      else q='\u00B7';
+      /* il pallino della pioggia ha la precedenza su tutto: e' l'inizio
+         del ciclo e senza di lui la barra non si capisce */
+      const peso={'\u25CF':6,'\u2717':5,'\u25BC':4,'\u2524':2,'\u2588':1,'\u2500':1,'\u00B7':0};
+      if(c===null || peso[q]>peso[c]) c=q;
+    }
+    barra+=c;
+  }
+  return barra;
+}
+
 /* scrive txt a partire dalla colonna pos, allungando la riga con spazi */
 function riempi(riga,pos,txt){
   if(!txt) return riga;
@@ -1060,6 +1107,32 @@ function spiegaMotivo(m,sp){
            ', cio\u00e8 sotto il minimo che serve al carpoforo.';
   return 'la temperatura del suolo \u00e8 uscita dai limiti che questa specie tollera ('+
          sp.ts[0]+'\u2013'+sp.ts[3]+'\u00A0\u00B0C).';
+}
+
+/* Contenuto di una colonna-specie nella tabella: barra ristretta e testo.
+   Le stesse informazioni della scheda che si apre cliccando la stazione,
+   compresse per stare in cella. */
+function cellaScheda(st,sp){
+  const v=V(st).sp[sp.id], o=v.ondata;
+  if(!o) return '<span class="sc-vuoto">nessun innesco negli ultimi '+FINESTRA_GG+' giorni</span>';
+  const mm=Math.round(o.mm);
+  let s='<div class="sc-tit">'+dataBreve(o.data)+' \u00b7 '+mm+' mm</div>';
+  if(o.sv) s+='<div class="sc-barra">'+escapeHtml(barraCompatta(o,sp,2))+'</div>';
+  s+='<div style="font-size:9.5px;color:#5E5646">'+o.stato.t+'</div>';
+  if(o.sv) s+=raccontoOndata(o,sp,st,gIdx).replace(/class="racconto"/g,'');
+  return s;
+}
+
+/* Versione senza formattazione, per CSV ed Excel. */
+function testoScheda(st,sp){
+  const v=V(st).sp[sp.id], o=v.ondata;
+  if(!o) return 'nessun innesco';
+  let s=dataBreve(o.data)+' \u00b7 '+Math.round(o.mm)+' mm \u00b7 '+o.stato.t;
+  if(o.sv){
+    s+=' \u00b7 '+raccontoOndata(o,sp,st,gIdx)
+        .replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  }
+  return s;
 }
 
 function valutaTutto(st,i){
@@ -1642,9 +1715,13 @@ function colonne(){
   c.push(['tot', (s.sp? s.nome : s.nome+'<br>gruppo').replace(/ /g,'<br>'), 'idxh']);
   SPECIE.forEach(sp=>{ if(!s.sp||sp.id!==s.id)
     c.push(['sp_'+sp.id, sp.nome.replace(/,? /g,'<br>'), 'idxh']); });
-  c.push(['stato','Stato ondata','testoh'],['ondata','Ondata del','testoh'],
+  c.push(['stato','Stato ondata','statoh'],['ondata','Ondata del','testoh'],
          ['ond_mm','Pioggia ondata','mm'],['resta','Sopravvissuto','%'],
          ['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
+  /* una colonna per specie con la scheda dell'ondata, dopo il versante */
+  SPECIE.forEach(function(sp){
+    c.push(['sch_'+sp.id, sp.nome.split(',')[0], 'schedah']);
+  });
   [['ts','T suolo<br>7\u201328<br>\u00b0C'],['ts0','T suolo<br>0\u20137<br>\u00b0C'],
    ['sm','Umidit\u00e0<br>7\u201328<br>m\u00b3/m\u00b3'],['sm0','Umidit\u00e0<br>0\u20137<br>m\u00b3/m\u00b3'],
    ['pio','Pioggia<br>del gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
@@ -1670,6 +1747,7 @@ function valori(st){
     p7:st.p7[i],p15:st.p15[i],p30:st.p30[i],ant:ant,gi:va.gi,T:va.T,I:va.I,
     ta:st.ta[i],tmn:st.tmn[i],tmx:st.tmx[i]};
   SPECIE.forEach(sp=>{ o['sp_'+sp.id]=vt.sp[sp.id].tot; });
+  SPECIE.forEach(sp=>{ o['sch_'+sp.id]=testoScheda(st,sp); });
   return o;
 }
 function cell(v,k){ if(v===null||v===undefined) return '\u2013';
@@ -1755,6 +1833,11 @@ function render(fit){
       if(k==='tot'||k.startsWith('sp_'))
         r+='<td class="idxc"><span class="idx" style="background:'+colore(v[k])+'">'+(v[k]===null?'\u2013':v[k])+'</span></td>';
       else if(k==='alberi'||k==='vers') r+='<td class="testo">'+v[k]+'</td>';
+      else if(k==='stato') r+='<td class="statoc">'+v[k]+'</td>';
+      else if(k.indexOf('sch_')===0){
+        const sp=SPECIE.find(function(x){ return x.id===k.slice(4); });
+        r+='<td class="schedac">'+cellaScheda(s,sp)+'</td>';
+      }
       else r+='<td class="num">'+cell(v[k],k)+'</td>';
     });
     return r+'</tr>'; }).join('');
