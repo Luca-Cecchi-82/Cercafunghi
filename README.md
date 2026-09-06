@@ -27,7 +27,7 @@ in ogni uscita — pagina, CSV e Excel.
 |---|---|---|---|
 | A1 | A1.1 | [/A1/](https://luca-cecchi-82.github.io/Cercafunghi/A1/) | indice a somma pesata |
 | A2 | A2.2 | [/A2/](https://luca-cecchi-82.github.io/Cercafunghi/A2/) | condizioni necessarie che azzerano l'indice |
-| A3 | A3.1 | [/A3/](https://luca-cecchi-82.github.io/Cercafunghi/A3/) | ondate di fruttificazione seguite nel tempo |
+| A3 | A3.2 | [/A3/](https://luca-cecchi-82.github.io/Cercafunghi/A3/) | ondate di fruttificazione seguite nel tempo |
 
 La pagina alla radice elenca i rami e rimanda al corrente.
 
@@ -117,8 +117,18 @@ GPX danno una posizione affidabile.
 
 ## Aggiornamento
 
-I `dati.json` si aggiornano da soli ogni notte alle 5:10 tramite GitHub Actions.
-Si può anche lanciare a mano da **Actions → Aggiorna i dati → Run workflow**.
+I `dati.json` si aggiornano da soli due volte al giorno tramite GitHub Actions, alle
+**2:37** e alle **13:22** italiane d'estate. Si può anche lanciare a mano da
+**Actions → Aggiorna i dati → Run workflow**.
+
+Le esecuzioni sono due perché gli orari programmati di GitHub non sono garantiti: nei
+momenti di carico vengono ritardati o saltati, e succede più spesso agli orari tondi. La
+prima passata è notturna perché il SIR chiude la giornata a mezzanotte; la seconda fa da
+rete. Il cron lavora in UTC e non conosce l'ora legale, quindi d'inverno gli orari
+scalano di un'ora: la conversione è spiegata nei commenti del file del workflow.
+
+GitHub disattiva le esecuzioni programmate dopo 60 giorni di inattività sul repository:
+dopo una pausa lunga vanno riattivate a mano.
 
 Per rifarlo sul proprio computer serve solo Python 3, senza installare niente:
 

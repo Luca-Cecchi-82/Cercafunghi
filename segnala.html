@@ -35,7 +35,18 @@ textarea{resize:vertical;min-height:64px}
 .opt[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
 .opt small{display:block;font-size:10px;opacity:.72;font-style:italic}
 
-#map{height:300px;border:1px solid var(--curva);background:var(--carta)}
+.luoghi-box{position:relative}
+#luoghi-esiti{display:none;position:absolute;z-index:1200;top:100%;left:0;right:0;
+ background:var(--carta);border:1.5px solid var(--inchiostro);max-height:200px;overflow-y:auto}
+#luoghi-esiti.vis{display:block}
+.lg-r{padding:7px 9px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--curva)}
+.lg-r:last-child{border-bottom:0}
+.lg-r:hover{background:var(--inchiostro);color:var(--carta)}
+.lg-no{padding:7px 9px;font-size:12px;color:#5E5646;font-style:italic}
+.gps-btn a{font-size:17px;line-height:26px;text-align:center;font-weight:700}
+.gps-btn.attesa a{opacity:.4}
+.sotto-campo{margin-top:11px;padding-top:10px;border-top:1px solid var(--curva)}
+#map{height:340px;border:1px solid var(--curva);background:var(--carta)}
 input[type=file]{font-family:inherit;font-size:12px;width:100%;padding:8px;
  border:1px dashed var(--curva);background:var(--carta);color:#4A4335}
 input[type=file]::file-selector-button{font-family:inherit;font-size:12px;padding:5px 10px;
@@ -103,11 +114,26 @@ input[type=file]::file-selector-button{font-family:inherit;font-size:12px;paddin
 
 <div class="campo">
   <div class="flab">Dove &mdash; tocca la zona sulla mappa</div>
-  <div class="aiuto">Basta l'area indicativa, non il punto esatto. Trascina e ingrandisci per spostarti.</div>
+  <div class="aiuto">Basta l'area indicativa, non il punto esatto. Cerca una localit&agrave; per
+  spostarti in zona, oppure usa il pulsante &#9678; per centrare sulla tua posizione.</div>
+  <div class="luoghi-box" style="margin-bottom:8px">
+    <input type="search" id="luoghi" placeholder="Cerca un luogo: Passo delle Radici, Abetone&hellip;" autocomplete="off">
+    <div id="luoghi-esiti"></div>
+  </div>
   <div id="map"></div>
   <div class="mapnota" id="mapnota">Nessun punto indicato.</div>
   <div style="margin-top:9px">
     <input type="text" id="zona_testo" placeholder="Descrizione della zona (facoltativo)">
+  </div>
+
+  <div class="sotto-campo">
+    <div class="flab">Tracciato GPX <span class="opz">facoltativo, ma prezioso</span></div>
+    <div class="aiuto">Se hai registrato il giro con un'app da trekking (Wikiloc, Komoot,
+    OsmAnd, Gaia…), esporta il GPX e allegalo qui. <span style="color:var(--accento)">Un
+    tracciato vale molte segnalazioni normali</span>: d&agrave; il percorso reale, la quota
+    e l'area davvero battuta, non un punto a memoria.</div>
+    <input type="file" id="gpx" accept=".gpx,application/gpx+xml,text/xml">
+    <div class="mapnota" id="gpxnota"></div>
   </div>
 </div>
 
@@ -153,15 +179,6 @@ input[type=file]::file-selector-button{font-family:inherit;font-size:12px;paddin
 <div class="campo">
   <div class="flab">Altre specie <span class="opz">facoltativo</span></div>
   <div class="opts" id="altre_specie"></div>
-</div>
-
-<div class="campo">
-  <div class="flab">Tracciato GPX <span class="opz">facoltativo, ma prezioso</span></div>
-  <div class="aiuto">Se hai registrato il giro con un'app da trekking (Wikiloc, Komoot, OsmAnd, Gaia…),
-  esporta il GPX e allegalo qui. <span style="color:var(--accento)">Un tracciato vale molte segnalazioni
-  normali</span>: d&agrave; il percorso reale, la quota e l'area davvero battuta, non un punto a memoria.</div>
-  <input type="file" id="gpx" accept=".gpx,application/gpx+xml,text/xml">
-  <div class="mapnota" id="gpxnota"></div>
 </div>
 
 <div class="campo">
@@ -242,7 +259,7 @@ input[type=file]::file-selector-button{font-family:inherit;font-size:12px;paddin
   <b>In breve.</b> Le segnalazioni finiscono in un foglio privato e servono solo a verificare e calibrare
   il modello. <b>Le posizioni non vengono pubblicate né condivise:</b> sulla mappa pubblica non comparirà
   mai il tuo punto. Puoi chiedere in qualsiasi momento di cancellare le tue segnalazioni.<br><br>
-  <a href="A1/">&larr; torna all'app</a>
+  <a href="./">&larr; torna all'app</a>
 </div>
 
 </div>
@@ -251,7 +268,7 @@ input[type=file]::file-selector-button{font-family:inherit;font-size:12px;paddin
 /* ============================================================
    PARAMETRI  -  si regolano qui, senza toccare il resto
    ============================================================ */
-const VERSIONE_FORM = 'F1.0';
+const VERSIONE_FORM = 'F1.1';
 
 /* Indirizzo dell'applicazione web di Apps Script che scrive sul foglio.
    Se un giorno ripubblichi lo script, cambia SOLO questa riga. */
@@ -359,9 +376,89 @@ costruisciOpzioni('altre_specie', ALTRE, true);
 /* ------------------------------------------------------------ mappa */
 let punto = null, segnaposto = null;
 const mappa = L.map('map').setView(CENTRO, ZOOM);
-L.tileLayer('https://tile.opentopomap.org/{z}/{x}/{y}.png', {
-  maxZoom: 17, attribution: '&copy; OpenTopoMap, OpenStreetMap'
-}).addTo(mappa);
+
+/* stessi sfondi della mappa principale */
+const topo = L.tileLayer('https://tile.opentopomap.org/{z}/{x}/{y}.png',
+  {maxZoom:17, attribution:'&copy; OpenTopoMap, OpenStreetMap'}).addTo(mappa);
+const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:18, attribution:'Immagini Esri, Maxar'});
+const orto = L.tileLayer.wms('https://www502.regione.toscana.it/wmsraster/com.rt.wms.RTmap/wms',
+  {layers:'rt_ofc.10k22.32bit', format:'image/jpeg', transparent:false, maxZoom:19,
+   attribution:'Ortofoto Regione Toscana'});
+const strade = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19, attribution:'&copy; OpenStreetMap'});
+L.control.layers({'Topografica':topo,'Satellite':sat,
+  'Ortofoto Toscana 20 cm':orto,'Stradale':strade},null,
+  {position:'topright',collapsed:true}).addTo(mappa);
+
+/* ------- dove sono: centra la mappa e lascia un segno ------- */
+let segnoGps=null, cerchioGps=null;
+const bottoneGps=L.control({position:'bottomright'});
+bottoneGps.onAdd=function(){
+  const d=L.DomUtil.create('div','leaflet-bar gps-btn');
+  d.innerHTML='<a href="#" title="Dove sono" aria-label="Dove sono">\u25CE</a>';
+  L.DomEvent.disableClickPropagation(d);
+  d.onclick=function(e){
+    e.preventDefault();
+    if(!navigator.geolocation){ alert('Il browser non sa dare la posizione.'); return; }
+    d.classList.add('attesa');
+    navigator.geolocation.getCurrentPosition(function(p){
+      d.classList.remove('attesa');
+      if(segnoGps) mappa.removeLayer(segnoGps);
+      if(cerchioGps) mappa.removeLayer(cerchioGps);
+      const a=p.coords.accuracy;
+      if(a&&a<3000) cerchioGps=L.circle([p.coords.latitude,p.coords.longitude],
+        {radius:a,color:'#2B6CB0',weight:1,fillColor:'#2B6CB0',fillOpacity:.10,
+         interactive:false}).addTo(mappa);
+      segnoGps=L.circleMarker([p.coords.latitude,p.coords.longitude],
+        {radius:7,color:'#fff',weight:2,fillColor:'#2B6CB0',fillOpacity:1})
+        .addTo(mappa).bindTooltip('Sei qui',{direction:'top'});
+      mappa.setView([p.coords.latitude,p.coords.longitude],14);
+    },function(){
+      d.classList.remove('attesa');
+      alert('Non riesco a leggere la posizione. Controlla di aver dato il permesso al browser.');
+    },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+  };
+  return d;
+};
+bottoneGps.addTo(mappa);
+
+/* ------- ricerca di localita', per spostarsi sulla mappa ------- */
+let attesaLuogo=null;
+function cercaLuogo(q){
+  const box=$('luoghi-esiti');
+  if(!q||q.trim().length<3){ box.innerHTML=''; box.classList.remove('vis'); return; }
+  fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=it'
+        +'&limit=6&accept-language=it&q='+encodeURIComponent(q.trim()),
+        {headers:{'Accept':'application/json'}})
+    .then(function(r){ return r.json(); })
+    .then(function(a){
+      if(!a.length){ box.innerHTML='<div class="lg-no">nessun luogo trovato</div>';
+                     box.classList.add('vis'); return; }
+      box.innerHTML=a.map(function(x,k){
+        return '<div class="lg-r" data-k="'+k+'">'
+              +x.display_name.split(',').slice(0,3).join(',')+'</div>';
+      }).join('');
+      box.classList.add('vis');
+      box.querySelectorAll('.lg-r').forEach(function(r){
+        r.onclick=function(){
+          const x=a[+r.dataset.k];
+          mappa.setView([+x.lat,+x.lon],14);
+          box.classList.remove('vis');
+        };
+      });
+    })
+    .catch(function(){ box.innerHTML='<div class="lg-no">ricerca non riuscita</div>';
+                       box.classList.add('vis'); });
+}
+$('luoghi').addEventListener('input',function(){
+  clearTimeout(attesaLuogo);
+  const v=this.value;
+  attesaLuogo=setTimeout(function(){ cercaLuogo(v); },600);
+});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.luoghi-box')) $('luoghi-esiti').classList.remove('vis');
+});
 
 mappa.on('click', function(e){
   punto = e.latlng;

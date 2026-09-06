@@ -8,6 +8,66 @@ momento: [Releases](https://github.com/luca-cecchi-82/Cercafunghi/releases).
 
 ---
 
+## A3.2 — 5 settembre 2026
+
+Nessun cambiamento al calcolo. Interventi sulla tabella, sulle mappe e sul modulo di
+segnalazione.
+
+### Tabella
+
+Rimossa la colonna con le schede delle specie, introdotta e ritirata nel giro di poche
+ore. Il problema non era l'aspetto: con sette colonne di testo il browser doveva
+generare il racconto oltre cinquemila volte a ogni ridisegno — 376 stazioni per 7
+specie, due volte — e si fermava prima di scrivere le righe. Restava solo l'intestazione.
+
+Provata anche la variante a colonna unica con pieghevole, generata solo all'apertura.
+Funzionava, ma il testo completo in una cella di tabella resta poco leggibile e appesantiva
+l'export oltre misura: settemila caratteri per stazione. Il racconto resta dove serve
+davvero, nella scheda che si apre cliccando la stazione.
+
+Altezza della tabella ridotta da 1000 a 460 pixel, così non occupa tutta la pagina.
+
+### Mappe
+
+**Ricerca di località**, sopra la ricerca fra le stazioni. Non filtra niente: sposta la
+mappa dove si vuole guardare. Usa il servizio di ricerca di OpenStreetMap, limitato
+all'Italia, con una pausa fra un tasto e l'altro come richiesto dalle sue condizioni
+d'uso.
+
+**Pulsante della posizione** in basso a destra: centra la mappa su dove ci si trova e
+lascia un segno, con un cerchio che indica la precisione della lettura.
+
+**Ortofoto Toscana 20 cm** fra gli sfondi, molto più dettagliata della satellitare
+globale, e già fonte del progetto.
+
+Non è stata usata la satellitare di Google: prenderne i tile in Leaflet viola i loro
+termini di servizio, e la via ufficiale richiede una chiave nel JavaScript, cosa che le
+regole del progetto escludono.
+
+### Modulo di segnalazione (F1.1)
+
+Il tracciato GPX è stato spostato dentro il riquadro «Dove», sotto la descrizione della
+zona: appartiene alla posizione, non a una sezione a sé. La mappa ha ora gli stessi
+sfondi dell'app, la ricerca di località e il pulsante della posizione. Il rimando «torna
+all'app» punta alla pagina di scelta del ramo invece che ad A1, dove era rimasto da
+quando A1 era l'unico.
+
+### Aggiornamento automatico
+
+Il 5 settembre l'esecuzione notturna non è partita: i dati sono rimasti fermi al 4. Non
+un errore dello script — gli orari programmati di GitHub non sono garantiti e agli orari
+tondi, dove si accalcano tutti, vengono ritardati o saltati.
+
+Ora le esecuzioni sono due, alle 2:37 e alle 13:22 italiane d'estate, con minuti dispari
+per evitare la calca. La prima è notturna perché il SIR chiude la giornata a mezzanotte,
+la seconda fa da rete. Aggiunto anche il recupero del push se nel frattempo è arrivato
+un altro commit, che prima faceva fallire l'aggiornamento in silenzio.
+
+Da tenere presente: GitHub disattiva le esecuzioni programmate dopo 60 giorni di
+inattività sul repository. Dopo una pausa lunga vanno riattivate a mano.
+
+---
+
 ## A3.1 — 3 settembre 2026
 
 Nessun cambiamento al calcolo: l'indice di A3.0 e quello di A3.1 sono identici. Cambia
