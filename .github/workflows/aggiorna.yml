@@ -1,11 +1,35 @@
 name: Aggiorna i dati
 
-# Gira ogni notte alle 05:10 italiane (04:10 UTC in ora legale),
-# e si puo' lanciare a mano dalla scheda Actions.
+# ORARI - attenzione: GitHub usa SEMPRE l'ora UTC e non conosce l'ora
+# legale, quindi lo stesso cron cade un'ora piu' tardi in estate.
+#
+#   cron "37 0"  ->  02:37 italiane d'estate,  01:37 d'inverno
+#   cron "22 11" ->  13:22 italiane d'estate,  12:22 d'inverno
+#
+# Il primo passaggio e' notturno perche' il SIR chiude la giornata a
+# mezzanotte: due ore dopo il dato del giorno prima e' gia' pubblicato.
+# Il secondo cade in pausa pranzo e fa da rete.
+#
+# Per spostare un orario: prendi l'ora italiana che vuoi, togli 2 in
+# estate (1 in inverno) e scrivi il risultato qui sotto.
+#
+# Perche' due esecuzioni: gli orari programmati di GitHub non sono
+# garantiti. Nei momenti di carico vengono ritardati di ore o saltati
+# del tutto, e succede piu' spesso agli orari tondi, dove si accalcano
+# tutti. Il minuto dispari evita la calca, la seconda esecuzione fa da
+# rete se la prima salta. Rilanciare non fa danni: se i dati non sono
+# cambiati lo script non committa niente.
 on:
   schedule:
-    - cron: "10 4 * * *"
+    - cron: "37 0 * * *"
+    - cron: "22 11 * * *"
   workflow_dispatch:
+
+# Se per qualche motivo due esecuzioni si accavallano, la seconda
+# aspetta invece di scrivere sugli stessi file contemporaneamente.
+concurrency:
+  group: aggiorna-dati
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -42,5 +66,6 @@ jobs:
             echo "Nessuna variazione: non committo niente."
           else
             git commit -m "Dati aggiornati al $(date +'%d/%m/%Y') - rami: $RAMI"
-            git push
+            # se nel frattempo e' arrivato un altro commit, riallineo e riprovo
+            git push || (git pull --rebase && git push)
           fi
