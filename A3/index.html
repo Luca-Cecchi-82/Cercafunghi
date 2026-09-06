@@ -95,8 +95,18 @@ svg.g{display:block;width:100%;height:auto;overflow:visible}
 .ptlab{font-size:9.5px;fill:var(--inchiostro);pointer-events:none;font-weight:500}
 
 /* tabella */
+.luoghi-box{position:relative}
+#luoghi-esiti{display:none;position:absolute;z-index:1200;top:100%;left:0;right:0;
+ background:var(--carta);border:1.5px solid var(--inchiostro);max-height:210px;overflow-y:auto}
+#luoghi-esiti.vis{display:block}
+.lg-r{padding:6px 9px;font-size:11.5px;cursor:pointer;border-bottom:1px solid var(--curva)}
+.lg-r:last-child{border-bottom:0}
+.lg-r:hover{background:var(--inchiostro);color:var(--carta)}
+.lg-no{padding:6px 9px;font-size:11.5px;color:#5E5646;font-style:italic}
+.gps-btn a{font-size:17px;line-height:26px;text-align:center;font-weight:700}
+.gps-btn.attesa a{opacity:.4}
 .tab-scroll{overflow:auto;border:1.5px solid var(--inchiostro);background:var(--carta2);
- max-height:min(82vh,1000px);resize:vertical}
+ max-height:min(52vh,460px);resize:vertical}
 table{border-collapse:collapse;width:100%;font-size:12px;min-width:1080px}
 th{background:var(--inchiostro);color:var(--carta);font-weight:500;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:7px 8px;text-align:right;cursor:pointer;white-space:nowrap;position:sticky;top:0;z-index:2}
 th:first-child,th:nth-child(2){text-align:left}
@@ -276,6 +286,9 @@ td.nome,th.nomeh{max-width:150px;white-space:normal}
         <div class="chips" id="chipArea"></div>
       </div>
       <div class="fgrp"><span class="flab">Quota minima <span id="qv">0</span> m</span><input type="range" id="q" min="0" max="1600" step="50" value="0" style="width:150px"></div>
+      <div class="fgrp luoghi-box"><span class="flab">Cerca luogo sulla mappa</span>
+        <input type="search" id="luoghi" placeholder="Passo delle Radici, Abetone&hellip;" autocomplete="off">
+        <div id="luoghi-esiti"></div></div>
       <div class="fgrp"><span class="flab">Cerca stazione</span><input type="search" id="cerca" placeholder="Orecchiella&hellip;"></div>
     </div>
     <div class="conteggio" id="cnt"></div>
@@ -1272,7 +1285,95 @@ const etich=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Re
 const strade=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,opacity:.8,attribution:'&copy; OpenStreetMap contributors'});
 const rilievo=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',{maxZoom:17,maxNativeZoom:13,opacity:.85,attribution:'Rilievo Esri'});
 topo.addTo(map);
-L.control.layers({'Topografica':topo,'Satellite':sat,'Stradale':strade,'Rilievo':rilievo},{'Etichette luoghi':etich},{position:'topright',collapsed:true}).addTo(map);
+/* Ortofoto regionali a 20 cm: molto piu' dettagliate della satellitare
+   globale, e sono gia' una fonte del progetto. Solo Toscana. */
+const orto=L.tileLayer.wms('https://www502.regione.toscana.it/wmsraster/com.rt.wms.RTmap/wms',
+  {layers:'rt_ofc.10k22.32bit', format:'image/jpeg', transparent:false, maxZoom:19,
+   attribution:'Ortofoto Regione Toscana'});
+L.control.layers({'Topografica':topo,'Satellite':sat,'Ortofoto Toscana 20 cm':orto,
+  'Stradale':strade,'Rilievo':rilievo},{'Etichette luoghi':etich},
+  {position:'topright',collapsed:true}).addTo(map);
+
+/* ---------------- posizione e ricerca di luoghi ---------------- */
+/* Pulsante che centra sulla propria posizione e lascia un segno.
+   Il permesso lo chiede il browser, e serve una connessione sicura. */
+let segnoGps=null, cerchioGps=null;
+const bottoneGps=L.control({position:'bottomright'});
+bottoneGps.onAdd=function(){
+  const d=L.DomUtil.create('div','leaflet-bar gps-btn');
+  d.innerHTML='<a href="#" title="Dove sono" aria-label="Dove sono">\u25CE</a>';
+  L.DomEvent.disableClickPropagation(d);
+  d.onclick=function(e){
+    e.preventDefault();
+    if(!navigator.geolocation){ alert('Il browser non sa dare la posizione.'); return; }
+    d.classList.add('attesa');
+    navigator.geolocation.getCurrentPosition(function(p){
+      d.classList.remove('attesa');
+      mostraPosizione(p.coords.latitude,p.coords.longitude,p.coords.accuracy);
+      map.setView([p.coords.latitude,p.coords.longitude],13);
+    },function(){
+      d.classList.remove('attesa');
+      alert('Non riesco a leggere la posizione. Controlla di aver dato il permesso al browser.');
+    },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+  };
+  return d;
+};
+bottoneGps.addTo(map);
+
+function mostraPosizione(lat,lon,prec){
+  if(segnoGps) map.removeLayer(segnoGps);
+  if(cerchioGps) map.removeLayer(cerchioGps);
+  if(prec&&prec<3000){
+    cerchioGps=L.circle([lat,lon],{radius:prec,color:'#2B6CB0',weight:1,
+      fillColor:'#2B6CB0',fillOpacity:.10,interactive:false}).addTo(map);
+  }
+  segnoGps=L.circleMarker([lat,lon],{radius:7,color:'#fff',weight:2,
+    fillColor:'#2B6CB0',fillOpacity:1}).addTo(map)
+    .bindTooltip('Sei qui',{direction:'top'});
+}
+
+/* Ricerca di localita' sul territorio, non fra le stazioni: serve a
+   spostare la mappa dove si vuole guardare. Usa il servizio di
+   ricerca di OpenStreetMap, limitato all'Italia. */
+let segnoLuogo=null, attesaLuogo=null;
+function cercaLuogo(q){
+  const box=document.getElementById('luoghi-esiti');
+  if(!q||q.trim().length<3){ box.innerHTML=''; box.classList.remove('vis'); return; }
+  const url='https://nominatim.openstreetmap.org/search?format=json&countrycodes=it'
+           +'&limit=6&accept-language=it&q='+encodeURIComponent(q.trim());
+  fetch(url,{headers:{'Accept':'application/json'}})
+    .then(function(r){ return r.json(); })
+    .then(function(a){
+      if(!a.length){ box.innerHTML='<div class="lg-no">nessun luogo trovato</div>';
+                     box.classList.add('vis'); return; }
+      box.innerHTML=a.map(function(x,k){
+        return '<div class="lg-r" data-k="'+k+'">'+x.display_name.split(',').slice(0,3).join(',')+'</div>';
+      }).join('');
+      box.classList.add('vis');
+      box.querySelectorAll('.lg-r').forEach(function(r){
+        r.onclick=function(){
+          const x=a[+r.dataset.k];
+          if(segnoLuogo) map.removeLayer(segnoLuogo);
+          segnoLuogo=L.marker([+x.lat,+x.lon]).addTo(map)
+            .bindPopup(x.display_name.split(',').slice(0,3).join(',')).openPopup();
+          map.setView([+x.lat,+x.lon],13);
+          box.classList.remove('vis');
+        };
+      });
+    })
+    .catch(function(){ box.innerHTML='<div class="lg-no">ricerca non riuscita</div>';
+                       box.classList.add('vis'); });
+}
+document.getElementById('luoghi').addEventListener('input',function(){
+  clearTimeout(attesaLuogo);
+  const v=this.value;
+  /* il servizio chiede di non essere interrogato a ogni tasto */
+  attesaLuogo=setTimeout(function(){ cercaLuogo(v); },600);
+});
+document.addEventListener('click',function(e){
+  const b=document.getElementById('luoghi-esiti');
+  if(b && !e.target.closest('.luoghi-box')) b.classList.remove('vis');
+});
 map.on('baselayerchange',e=>{ if(e.name==='Satellite'){ if(!map.hasLayer(etich)) etich.addTo(map); }
  else if(map.hasLayer(etich)) map.removeLayer(etich); });
 L.control.scale({imperial:false,position:'bottomleft'}).addTo(map);
@@ -1766,9 +1867,7 @@ function colonne(){
   c.push(['stato','Stato ondata','statoh'],['ondata','Ondata del','testoh'],
          ['ond_mm','Pioggia ondata','mm'],['resta','Sopravvissuto','%'],
          ['alberi','Dove cercare','testoh'],['vers','Versante consigliato','testoh']);
-  /* una sola colonna con tutte le schede, chiusa: si apre a richiesta.
-     Sette colonne di testo rendevano la tabella illeggibile e pesante. */
-  c.push(['schede','Schede specie','schedah']);
+
   [['ts','T suolo<br>7\u201328<br>\u00b0C'],['ts0','T suolo<br>0\u20137<br>\u00b0C'],
    ['sm','Umidit\u00e0<br>7\u201328<br>m\u00b3/m\u00b3'],['sm0','Umidit\u00e0<br>0\u20137<br>m\u00b3/m\u00b3'],
    ['pio','Pioggia<br>del gg<br>mm'],['p7','P7<br>mm'],['p15','P15<br>mm'],['p30','P30<br>mm'],
@@ -1884,14 +1983,10 @@ function render(fit){
         r+='<td class="idxc"><span class="idx" style="background:'+colore(v[k])+'">'+(v[k]===null?'\u2013':v[k])+'</span></td>';
       else if(k==='alberi'||k==='vers') r+='<td class="testo">'+v[k]+'</td>';
       else if(k==='stato') r+='<td class="statoc">'+v[k]+'</td>';
-      else if(k==='schede')
-        r+='<td class="schedac"><details class="sc-det" data-st="'+s.c+'">'
-          +'<summary>schede delle specie</summary><div class="sc-corpo"></div>'
-          +'</details></td>';
+
       else r+='<td class="num">'+cell(v[k],k)+'</td>';
     });
     return r+'</tr>'; }).join('');
-  attivaSchede();
 
   if(fit&&L_.length) map.fitBounds(L.latLngBounds(L_.map(s=>[s.lat,s.lon])),{padding:[26,26]});
 }
@@ -1904,11 +1999,7 @@ function matrice(){
   const righe=[int];
   L_.map(s=>({s,v:valori(s)})).sort((a,b)=>(b.v.tot||0)-(a.v.tot||0)).forEach(({s,v})=>{
     righe.push([s.c,s.n,s.m,s.p,s.a,s.q,s.lat,s.lon,DATE[gIdx]]
-      .concat(COLS.slice(3).map(c=>{
-        if(c[0]==='schede') return SPECIE.map(function(sp){
-          return sp.nome+': '+testoScheda(s,sp);
-        }).join('\n');
-        const x=v[c[0]]; return x===null||x===undefined?'':x; })));
+      .concat(COLS.slice(3).map(c=>{ const x=v[c[0]]; return x===null||x===undefined?'':x; })));
   });
   return righe;
 }
@@ -1929,16 +2020,9 @@ document.getElementById('xlsx').onclick=()=>{
   if(typeof XLSX==='undefined'){ alert('Libreria Excel non caricata: uso il CSV.'); document.getElementById('csv').click(); return; }
   const m=matrice(), ws=XLSX.utils.aoa_to_sheet(m);
   ws['!cols']=m[0].map((h,j)=>({wch: j===1?24 : (h==='Dove cercare')?42
-    : (h==='Versante consigliato')?60 : (h==='Schede specie')?90
+    : (h==='Versante consigliato')?60
     : Math.max(8,Math.min(16,String(h).length+2))}));
-  /* la colonna delle schede contiene piu' capoversi: va mandata a capo */
-  const jSch=m[0].indexOf('Schede specie');
-  if(jSch>=0){
-    for(let r=1;r<m.length;r++){
-      const cel=ws[XLSX.utils.encode_cell({r:r,c:jSch})];
-      if(cel){ cel.s=Object.assign({},cel.s,{alignment:{wrapText:true,vertical:'top'}}); }
-    }
-  }
+
   ws['!freeze']={xSplit:2,ySplit:1};
   ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:m.length-1,c:m[0].length-1}})};
   const wb=XLSX.utils.book_new();
